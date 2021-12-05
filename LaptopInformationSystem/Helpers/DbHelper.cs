@@ -99,7 +99,7 @@ namespace LaptopInformationSystem.Helpers
             DataTable results = new DataTable();
             int offset = (pageNumber - 1) * pageSize;
             string finalCommand = "";
-            string codeSearchCommand = "";
+            string searchCommand = "";
             string getDevicesCommand = "SELECT id AS ID, code AS Code, model AS Model, type AS Type, purchased_on AS \"Purchased on\" FROM devices WHERE 1=1";
             string pagingCommand = " LIMIT " + pageSize + " OFFSET " + offset;
             string orderByCommand = "";
@@ -111,7 +111,7 @@ namespace LaptopInformationSystem.Helpers
                 if(search != "")
                 {
                     search = "%" + search.ToUpper() + "%";
-                    codeSearchCommand = " AND (UPPER(code) LIKE @search OR UPPER(model) LIKE @search)";
+                    searchCommand = " AND (UPPER(code) LIKE @search OR UPPER(model) LIKE @search)";
                 }
 
                 if(orderBy != "")
@@ -132,11 +132,11 @@ namespace LaptopInformationSystem.Helpers
                     }
                     else
                     {
-                        orderByCommand = " ORDER BY purchased_on ASC";
+                        orderByCommand = " ORDER BY purchased_on DESC";
                     }
                 }
 
-                finalCommand = getDevicesCommand + codeSearchCommand + orderByCommand + pagingCommand;
+                finalCommand = getDevicesCommand + searchCommand + orderByCommand + pagingCommand;
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = finalCommand;
@@ -265,14 +265,23 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public string GetTotalDevices()
+        public string GetTotalDevices(string search = "")
         {
             string total = "0";
             try
             {
                 this.GetDbConnection();
                 MySqlCommand cmd = this.conn.CreateCommand();
-                cmd.CommandText = "SELECT COUNT(1) FROM devices";
+                string searchCommand = "";
+
+                if (search != "")
+                {
+                    search = "%" + search.ToUpper() + "%";
+                    searchCommand = " WHERE (UPPER(code) LIKE @search OR UPPER(model) LIKE @search)";
+                }
+
+                cmd.CommandText = "SELECT COUNT(1) FROM devices" + searchCommand;
+                cmd.Parameters.AddWithValue("@search", search);
 
                 this.conn.Open();
                 total = Convert.ToString(cmd.ExecuteScalar());

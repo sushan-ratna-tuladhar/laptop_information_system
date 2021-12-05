@@ -37,14 +37,11 @@ namespace LaptopInformationSystem
 
             try
             {
-                int total = 0;
                 this.txtCodeSearch.Text = "";
                 this.txtPageNo.Text = "1";
                 this.dropdownPageSize.Text = "20";
-                this.lblTotalValue.Text = this.db.GetTotalDevices();
-                total = Convert.ToInt32(this.lblTotalValue.Text);
 
-                this.showData(1, 20, total, "", "");
+                this.showData(1, 20, "", "");
 
             }
             catch (Exception ex)
@@ -94,6 +91,10 @@ namespace LaptopInformationSystem
         private void btnCancelSaveDevice_Click(object sender, EventArgs e)
         {
             grpAddDevice.Hide();
+            if(btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
         }
 
         private void btnSaveDevice_Click(object sender, EventArgs e)
@@ -130,11 +131,32 @@ namespace LaptopInformationSystem
         private void btnCancelGetDevices_Click(object sender, EventArgs e)
         {
             grpShowDevices.Hide();
+            if(btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
         }
 
         private void dropdownPageSize_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.txtPageNo.Text = "1";
+            int value;
+            if (int.TryParse(dropdownPageSize.Text, out value))
+            {
+                if (value < 1)
+                    dropdownPageSize.Text = "1";
+            }
+        }
 
+        private void dropdownPageSize_TextUpdate(object sender, EventArgs e)
+        {
+            this.txtPageNo.Text = "1";
+            int value;
+            if (int.TryParse(dropdownPageSize.Text, out value))
+            {
+                if (value < 1)
+                    dropdownPageSize.Text = "1";
+            }
         }
 
         private void btnGetDevices_Click(object sender, EventArgs e)
@@ -143,10 +165,9 @@ namespace LaptopInformationSystem
             {
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
-                int total = Convert.ToInt32(this.lblTotalValue.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
 
-                this.showData(pageNumber, pageSize, total, search, "");
+                this.showData(pageNumber, pageSize, search, "");
             }
             catch (Exception ex)
             {
@@ -171,10 +192,9 @@ namespace LaptopInformationSystem
 
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
-                int total = Convert.ToInt32(this.lblTotalValue.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
 
-                this.showData(pageNumber, pageSize, total, search, "previousPage");
+                this.showData(pageNumber, pageSize, search, "previousPage");
             }
             catch (Exception ex)
             {
@@ -194,10 +214,9 @@ namespace LaptopInformationSystem
 
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
-                int total = Convert.ToInt32(this.lblTotalValue.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
 
-                this.showData(pageNumber, pageSize, total, search, "nextPage");
+                this.showData(pageNumber, pageSize, search, "nextPage");
 
             }
             catch (Exception ex)
@@ -205,60 +224,6 @@ namespace LaptopInformationSystem
                 Console.WriteLine("Error on GetDevices/NextPage : " + ex.Message + ", stack: " + ex.StackTrace);
                 MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
             }
-        }
-
-        private void showData(int pageNumber, int pageSize, int total, string search, string type)
-        {
-            this.dataGridDevices.Columns.Clear();
-            int remainingPages = (total/pageSize - pageNumber);
-
-            if (remainingPages >= -1)
-            {
-                if(type == "nextPage")
-                {
-                    pageNumber = pageNumber + 1;
-                }
-
-                if (remainingPages == 0)
-                {
-                    this.btnNextPage.Enabled = false;
-                }
-            }
-
-            if (pageNumber < 1)
-            {
-                pageNumber = 1;
-            }
-            else
-            {
-                if(type == "previousPage")
-                {
-                    pageNumber = pageNumber - 1;
-                }
-                
-                if (pageNumber == 1)
-                {
-                    this.btnPreviousPage.Enabled = false;
-                }
-            }
-
-            txtPageNo.Text = Convert.ToString(pageNumber);
-
-            this.devices = this.db.GetDevices(search, pageNumber, pageSize, "", "");
-
-            this.dataGridDevices.DataSource = devices;
-
-            DataGridViewButtonColumn button = new DataGridViewButtonColumn();
-            {
-                button.Name = "btnAction";
-                button.HeaderText = "";
-                button.Text = "Action";
-                button.UseColumnTextForButtonValue = true;
-                this.dataGridDevices.Columns.Add(button);
-            }
-
-            this.dataGridDevices.Columns["ID"].Visible = false;
-            this.dataGridDevices.Show();
         }
 
         private void dataGridDevices_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
@@ -282,6 +247,61 @@ namespace LaptopInformationSystem
                 deviceAction.ShowDialog();
             }
         }
+
+        private void txtCodeSearch_TextChanged(object sender, EventArgs e)
+        {
+            this.txtPageNo.Text = "1";
+        }
+
+        private void lblPageSize_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dropdownPageSize_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void txtPageNo_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+
+        }
+
+        private void txtPageNo_TextChanged(object sender, EventArgs e)
+        {
+            int value;
+            int maxPage = 0;
+            int total = Convert.ToInt32(lblTotalValue.Text);
+            int pageSize = Convert.ToInt32(dropdownPageSize.Text);
+
+            if(total % pageSize == 0)
+            {
+                maxPage = (total / pageSize);
+            } else
+            {
+                maxPage = (total / pageSize) + 1;
+            }
+            
+            if (int.TryParse(txtPageNo.Text, out value))
+            {
+                if (value > maxPage)
+                    txtPageNo.Text = Convert.ToString(maxPage);
+                else if (value < 1)
+                    txtPageNo.Text = "1";
+            }
+        }
+
+        //Custom functions
 
         void edit_onBtnEditClick(object sender, EventArgs e, int id, string code, string model, string type, string purchasedOn)
         {
@@ -309,16 +329,16 @@ namespace LaptopInformationSystem
                     string result = this.db.UpdateDevice(id, changedCode, changedModel, changedType, changedPurchasedOn);
                     DialogResult dialogResultUpdated = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
 
-                    if(dialogResultUpdated == DialogResult.OK)
+                    if (dialogResultUpdated == DialogResult.OK)
                     {
                         this.deviceEdit.Close();
-                        this.showData(1, 20, Convert.ToInt32(this.lblTotalValue.Text), "", "");
+                        this.showData(1, 20, "", "");
                     }
                 }
                 else if (dialogResult == DialogResult.No)
                 {
                     this.deviceEdit.Close();
-                    this.showData(1, 20, Convert.ToInt32(this.lblTotalValue.Text), "", "");
+                    this.showData(1, 20, "", "");
                 }
             }
             catch (Exception ex)
@@ -326,7 +346,7 @@ namespace LaptopInformationSystem
                 Console.WriteLine("Error on EditDevice: " + ex.Message + ", stack: " + ex.StackTrace);
                 MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
             }
-        } 
+        }
 
         void action_onBtnDeleteClick(object sender, EventArgs e, string code)
         {
@@ -338,10 +358,10 @@ namespace LaptopInformationSystem
                     string result = this.db.DeleteDevice(code);
                     DialogResult dialogResultDeleted = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
 
-                    if(dialogResultDeleted == DialogResult.OK)
+                    if (dialogResultDeleted == DialogResult.OK)
                     {
                         this.deviceAction.Close();
-                        this.showData(1, 20, Convert.ToInt32(this.lblTotalValue.Text), "", "");
+                        this.showData(1, 20, "", "");
                         this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices());
                     }
                 }
@@ -355,6 +375,82 @@ namespace LaptopInformationSystem
                 Console.WriteLine("Error on DeleteDevice: " + ex.Message + ", stack: " + ex.StackTrace);
                 MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
             }
+        }
+
+        void showData(int pageNumber, int pageSize, string search, string type)
+        {
+            this.dataGridDevices.Columns.Clear();
+            int total = Convert.ToInt32(this.db.GetTotalDevices(search));
+            int remainingPages = 0;
+
+            int maxPage = 0;
+
+            if (total % pageSize == 0)
+            {
+                maxPage = (total / pageSize);
+            }
+            else
+            {
+                maxPage = (total / pageSize) + 1;
+            }
+
+            if (remainingPages > -1)
+            {
+                if (type == "nextPage")
+                {
+                    pageNumber = pageNumber + 1;
+                }
+
+            }
+
+            if (pageNumber < 1)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                if (type == "previousPage")
+                {
+                    pageNumber = pageNumber - 1;
+                }
+            }
+
+            if (pageNumber == maxPage)
+            {
+                this.btnNextPage.Enabled = false;
+            }
+            else
+            {
+                this.btnNextPage.Enabled = true;
+            }
+
+            if (pageNumber == 1)
+            {
+                this.btnPreviousPage.Enabled = false;
+            }
+            else
+            {
+                this.btnPreviousPage.Enabled = true;
+            }
+
+            txtPageNo.Text = Convert.ToString(pageNumber);
+
+            this.devices = this.db.GetDevices(search, pageNumber, pageSize, "", "");
+
+            this.dataGridDevices.DataSource = devices;
+
+            DataGridViewButtonColumn button = new DataGridViewButtonColumn();
+            {
+                button.Name = "btnAction";
+                button.HeaderText = "";
+                button.Text = "Action";
+                button.UseColumnTextForButtonValue = true;
+                this.dataGridDevices.Columns.Add(button);
+            }
+
+            this.dataGridDevices.Columns["ID"].Visible = false;
+            this.lblTotalValue.Text = Convert.ToString(total);
+            this.dataGridDevices.Show();
         }
     }
 }
