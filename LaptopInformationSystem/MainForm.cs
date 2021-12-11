@@ -23,25 +23,40 @@ namespace LaptopInformationSystem
 
         private void btnShowDevice_Click(object sender, EventArgs e)
         {
-            if (grpAddDevice.Visible)
+            if (grpAddComponents.Visible)
             {
-                grpAddDevice.Hide();
+                grpAddComponents.Hide();
             }
             grpShowDevices.Show();
             btnShowDevice.Enabled = false;
 
-            if(btnAddDevice.Enabled == false)
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
             {
                 btnAddDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
             }
 
             try
             {
+                DataTable brands = this.db.GetBrands();
+
+                dropdownGetDevicesBrand.DisplayMember = "Brand";
+                dropdownGetDevicesBrand.ValueMember = "ID";
+                dropdownGetDevicesBrand.DataSource = brands;
+                dropdownGetDevicesBrand.SelectedItem = null;
+
                 this.txtCodeSearch.Text = "";
                 this.txtPageNo.Text = "1";
                 this.dropdownPageSize.Text = "20";
 
-                this.showData(1, 20, "", "");
+                this.showData(1, 20, "", 0, "");
 
             }
             catch (Exception ex)
@@ -59,12 +74,21 @@ namespace LaptopInformationSystem
             {
                 grpShowDevices.Hide();
             }
-            grpAddDevice.Show();
+            grpAddComponents.Show();
+            grpAddComponents.Text = "Add Devices";
             btnAddDevice.Enabled = false;
 
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
             if (btnShowDevice.Enabled == false)
             {
                 btnShowDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
             }
         }
 
@@ -90,7 +114,7 @@ namespace LaptopInformationSystem
 
         private void btnCancelSaveDevice_Click(object sender, EventArgs e)
         {
-            grpAddDevice.Hide();
+            grpAddComponents.Hide();
             if(btnAddDevice.Enabled == false)
             {
                 btnAddDevice.Enabled = true;
@@ -99,23 +123,7 @@ namespace LaptopInformationSystem
 
         private void btnSaveDevice_Click(object sender, EventArgs e)
         {
-            try
-            {
-                string model = txtModel.Text.Trim();
-                string code = txtCode.Text.Trim();
-                string type = dropdownType.Text.Trim();
-                string purchasedOn = dateTimePickerPurchasedOn.Value.ToString("yyyy-MM-dd");
 
-                string result = this.db.AddDevice(code, model, type, purchasedOn);
-                
-                MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
-
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Error on AddDevice : " + ex.Message + ", stack: " + ex.StackTrace);
-                MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
-            }
         }
 
         private void lblPurchasedOn_Click(object sender, EventArgs e)
@@ -163,11 +171,12 @@ namespace LaptopInformationSystem
         {
             try
             {
-                int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
+                int pageNumber = 1;
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
+                int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, "");
+                this.showData(pageNumber, pageSize, search, modelId, "");
             }
             catch (Exception ex)
             {
@@ -193,8 +202,9 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
+                int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, "previousPage");
+                this.showData(pageNumber, pageSize, search, modelId, "previousPage");
             }
             catch (Exception ex)
             {
@@ -215,8 +225,9 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
+                int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, "nextPage");
+                this.showData(pageNumber, pageSize, search, modelId, "nextPage");
 
             }
             catch (Exception ex)
@@ -301,8 +312,119 @@ namespace LaptopInformationSystem
             }
         }
 
-        //Custom functions
+        private void btnAddBrand_Click(object sender, EventArgs e)
+        {
+            if (grpShowDevices.Visible)
+            {
+                grpShowDevices.Hide();
+            }
 
+            if (txtAddModelName.Visible)
+            {
+                txtAddModelName.Hide();
+            }
+            if (lblAddModelBrand.Visible)
+            {
+                lblAddModelBrand.Hide();
+            }
+            if (dropdownAddModelBrand.Visible)
+            {
+                dropdownAddModelBrand.Hide();
+            }
+
+            grpAddComponents.Show();
+            lblAddBrandModelName.Show();
+            txtAddBrandName.Show();
+
+            grpAddComponents.Text = "Add Brand";
+            btnAddBrand.Enabled = false;
+
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
+        }
+
+        private void btnAddModel_Click(object sender, EventArgs e)
+        {
+            if (grpShowDevices.Visible)
+            {
+                grpShowDevices.Hide();
+            }
+
+            if (txtAddBrandName.Visible)
+            {
+                txtAddBrandName.Hide();
+            }
+
+            grpAddComponents.Show();
+            lblAddBrandModelName.Show();
+            txtAddModelName.Show();
+            lblAddModelBrand.Show();
+            
+            grpAddComponents.Text = "Add Model";
+            btnAddModel.Enabled = false;
+
+            DataTable brands = this.db.GetBrands();
+
+            dropdownAddModelBrand.DisplayMember = "Brand";
+            dropdownAddModelBrand.ValueMember = "ID";
+            dropdownAddModelBrand.DataSource = brands;
+
+            dropdownAddModelBrand.Show();
+
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if(lblAddModelBrand.Visible)
+            {
+                string modelName = txtAddModelName.Text.Trim();
+                int brandId = Convert.ToInt32(dropdownAddModelBrand.SelectedValue);
+                string result = this.db.AddModel(modelName, brandId);
+
+                MessageBox.Show(result, "Model Added", MessageBoxButtons.OK);
+            } else
+            {
+                string brandName = txtAddBrandName.Text.Trim();
+                string result = this.db.AddBrand(brandName);
+
+                MessageBox.Show(result, "Brand Added", MessageBoxButtons.OK);
+            }
+        }
+
+        private void dropdownGetDevicesBrand_SelectedChangeCommitted(object sender, EventArgs e)
+        {
+            int brandId = Convert.ToInt32(dropdownGetDevicesBrand.SelectedValue);
+
+            DataTable models = this.db.GetModels(brandId);
+
+            dropdownGetDevicesModel.DataSource = models;
+            dropdownGetDevicesModel.DisplayMember = "Model";
+            dropdownGetDevicesModel.ValueMember = "ID";
+        }
+
+        //Custom functions
         void edit_onBtnEditClick(object sender, EventArgs e, int id, string code, string model, string type, string purchasedOn)
         {
             this.deviceAction.Close();
@@ -332,13 +454,13 @@ namespace LaptopInformationSystem
                     if (dialogResultUpdated == DialogResult.OK)
                     {
                         this.deviceEdit.Close();
-                        this.showData(1, 20, "", "");
+                        this.showData(1, 20, "", 0, "");
                     }
                 }
                 else if (dialogResult == DialogResult.No)
                 {
                     this.deviceEdit.Close();
-                    this.showData(1, 20, "", "");
+                    this.showData(1, 20, "", 0, "");
                 }
             }
             catch (Exception ex)
@@ -361,8 +483,8 @@ namespace LaptopInformationSystem
                     if (dialogResultDeleted == DialogResult.OK)
                     {
                         this.deviceAction.Close();
-                        this.showData(1, 20, "", "");
-                        this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices());
+                        this.showData(1, 20, "", 0, "");
+                        this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices("", 0));
                     }
                 }
                 else if (dialogResult == DialogResult.No)
@@ -377,10 +499,10 @@ namespace LaptopInformationSystem
             }
         }
 
-        void showData(int pageNumber, int pageSize, string search, string type)
+        void showData(int pageNumber, int pageSize, string search, int modelId, string type)
         {
             this.dataGridDevices.Columns.Clear();
-            int total = Convert.ToInt32(this.db.GetTotalDevices(search));
+            int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId));
             int remainingPages = 0;
 
             int maxPage = 0;
@@ -435,9 +557,9 @@ namespace LaptopInformationSystem
 
             txtPageNo.Text = Convert.ToString(pageNumber);
 
-            this.devices = this.db.GetDevices(search, pageNumber, pageSize, "", "");
+            this.devices = this.db.GetDevices(search, modelId, pageNumber, pageSize, "", "");
 
-            this.dataGridDevices.DataSource = devices;
+            this.dataGridDevices.DataSource = this.devices;
 
             DataGridViewButtonColumn button = new DataGridViewButtonColumn();
             {
@@ -452,5 +574,11 @@ namespace LaptopInformationSystem
             this.lblTotalValue.Text = Convert.ToString(total);
             this.dataGridDevices.Show();
         }
+
+        private void lblSearch_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

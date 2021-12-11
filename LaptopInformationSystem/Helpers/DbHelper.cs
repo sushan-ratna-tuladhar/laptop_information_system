@@ -52,6 +52,7 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
+        //Devices
         public string AddDevice(string code, string model, string type, string purchasedOn)
         {
             try
@@ -94,15 +95,22 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public DataTable GetDevices(string search, int pageNumber, int pageSize, string orderBy, string orderDir)
+        public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir)
         {
             DataTable results = new DataTable();
             int offset = (pageNumber - 1) * pageSize;
             string finalCommand = "";
             string searchCommand = "";
-            string getDevicesCommand = "SELECT id AS ID, code AS Code, model AS Model, type AS Type, purchased_on AS \"Purchased on\" FROM devices WHERE 1=1";
+            string getDevicesCommand = 
+                "SELECT d.id AS ID, b.id AS BrandId, b.name AS Brand, m.id AS ModelId, m.name AS Model, d.serial_number AS SN, d.type AS Type, d.purchased_from AS PurchasedFrom, purchased_on AS PurchasedOn, " +
+                "d.invoice_number AS InvoiceNumber, d.sold_to AS SoldTo, d.sold_on AS SoldOn " + 
+                "FROM devices d " + 
+                "JOIN models m ON m.id = d.model_id " + 
+                "JOIN brands b ON b.id = m.brand_id " + 
+                "WHERE 1=1 ";
             string pagingCommand = " LIMIT " + pageSize + " OFFSET " + offset;
             string orderByCommand = "";
+            string modelCommand = "";
 
             try
             {
@@ -111,62 +119,87 @@ namespace LaptopInformationSystem.Helpers
                 if(search != "")
                 {
                     search = "%" + search.ToUpper() + "%";
-                    searchCommand = " AND (UPPER(code) LIKE @search OR UPPER(model) LIKE @search)";
+                    searchCommand = " AND (UPPER(d.serial_number) LIKE @search OR UPPER(m.name) LIKE @search OR UPPER(b.name) LIKE @search)";
+                }
+
+                if(modelId != 0)
+                {
+                    modelCommand = " AND d.model_id = @modelId";
                 }
 
                 if(orderBy != "")
                 {
                     if(orderDir != "")
                     {
-                        orderByCommand = " ORDER BY @orderBy @orderDir";
+                        orderByCommand = " ORDER BY d.@orderBy @orderDir";
                     } else
                     {
-                        orderByCommand = " ORDER BY @orderBy ASC";
+                        orderByCommand = " ORDER BY d.@orderBy ASC";
                     }
                 }
                 else
                 {
                     if (orderDir != "")
                     {
-                        orderByCommand = " ORDER BY purchased_on @orderDir";
+                        orderByCommand = " ORDER BY d.purchased_on @orderDir";
                     }
                     else
                     {
-                        orderByCommand = " ORDER BY purchased_on DESC";
+                        orderByCommand = " ORDER BY d.purchased_on DESC";
                     }
                 }
 
-                finalCommand = getDevicesCommand + searchCommand + orderByCommand + pagingCommand;
+                finalCommand = getDevicesCommand + modelCommand + searchCommand + orderByCommand + pagingCommand;
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = finalCommand;
                 cmd.Parameters.AddWithValue("@search", search);
                 cmd.Parameters.AddWithValue("@orderBy", orderBy);
                 cmd.Parameters.AddWithValue("@orderDir", orderDir);
+                cmd.Parameters.AddWithValue("@modelId", modelId);
 
                 this.conn.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    results.Columns.AddRange(new DataColumn[6] {
-                            new DataColumn("SerialNo"),
+                    results.Columns.AddRange(new DataColumn[13] {
+                            new DataColumn("No."),
                             new DataColumn("ID"),
-                            new DataColumn("Code"),
+                            new DataColumn("BrandId"),
+                            new DataColumn("Brand"),
+                            new DataColumn("ModelId"),
                             new DataColumn("Model"),
+                            new DataColumn("S/N"),
                             new DataColumn("Type"),
-                            new DataColumn("Purchased on")
+                            new DataColumn("Purchased from"),
+                            new DataColumn("Purchased on"),
+                            new DataColumn("Invoice number"),
+                            new DataColumn("Sold to"),
+                            new DataColumn("Sold on")
                     });
 
                     //Set AutoIncrement True for the First Column.
-                    results.Columns["SerialNo"].AutoIncrement = true;
+                    results.Columns["No."].AutoIncrement = true;
 
                     //Set the Starting or Seed value.
-                    results.Columns["SerialNo"].AutoIncrementSeed = offset + 1;
+                    results.Columns["No."].AutoIncrementSeed = offset + 1;
 
                     //Set the Increment value.
-                    results.Columns["SerialNo"].AutoIncrementStep = 1;
+                    results.Columns["No."].AutoIncrementStep = 1;
                     while (dr.Read())
                     {
-                        results.Rows.Add(null, dr["ID"], dr["Code"], dr["Model"], dr["Type"], Convert.ToDateTime(dr["Purchased on"]).ToString("dd/MM/yyyy"));
+                        results.Rows.Add(null,
+                            !Convert.IsDBNull(dr["ID"]) ? dr["ID"] : "",
+                            !Convert.IsDBNull(dr["BrandId"]) ? dr["BrandId"] : "",
+                            !Convert.IsDBNull(dr["Brand"]) ? dr["Brand"] : "",
+                            !Convert.IsDBNull(dr["ModelId"]) ? dr["ModelId"] : "",
+                            !Convert.IsDBNull(dr["Model"]) ? dr["Model"] : "",
+                            !Convert.IsDBNull(dr["SN"]) ? dr["SN"] : "",
+                            !Convert.IsDBNull(dr["Type"]) ? dr["Type"] : "",
+                            !Convert.IsDBNull(dr["PurchasedFrom"]) ? dr["PurchasedFrom"] : "",
+                            !Convert.IsDBNull(dr["PurchasedOn"]) ? Convert.ToDateTime(dr["PurchasedOn"]).ToString("dd/MM/yyyy") : "",
+                            !Convert.IsDBNull(dr["InvoiceNumber"]) ? dr["InvoiceNumber"] : "",
+                            !Convert.IsDBNull(dr["SoldTo"]) ? dr["SoldTo"] : "",
+                            !Convert.IsDBNull(dr["SoldOn"]) ? Convert.ToDateTime(dr["SoldOn"]).ToString("dd/MM/yyyy") : "");
                     }
                 }
 
@@ -265,7 +298,7 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public string GetTotalDevices(string search = "")
+        public string GetTotalDevices(string search, int modelId)
         {
             string total = "0";
             try
@@ -273,15 +306,21 @@ namespace LaptopInformationSystem.Helpers
                 this.GetDbConnection();
                 MySqlCommand cmd = this.conn.CreateCommand();
                 string searchCommand = "";
+                string modelCommand = "";
 
                 if (search != "")
                 {
                     search = "%" + search.ToUpper() + "%";
-                    searchCommand = " WHERE (UPPER(code) LIKE @search OR UPPER(model) LIKE @search)";
+                    searchCommand = " AND (UPPER(d.serial_number) LIKE @search OR UPPER(m.name) LIKE @search OR UPPER(b.name) LIKE @search)";
+                }
+                if(modelId != 0)
+                {
+                    modelCommand = " AND d.model_id = @modelId";
                 }
 
-                cmd.CommandText = "SELECT COUNT(1) FROM devices" + searchCommand;
+                cmd.CommandText = "SELECT COUNT(1) FROM devices d JOIN models m ON m.id = d.model_id JOIN brands b ON b.id = m.brand_id WHERE 1=1" + searchCommand + modelCommand;
                 cmd.Parameters.AddWithValue("@search", search);
+                cmd.Parameters.AddWithValue("@modelId", modelId);
 
                 this.conn.Open();
                 total = Convert.ToString(cmd.ExecuteScalar());
@@ -302,5 +341,174 @@ namespace LaptopInformationSystem.Helpers
             }
         }
 
+        //Brands
+        public DataTable GetBrands()
+        {
+            DataTable results = new DataTable();
+            string getBrandsCommand = "SELECT id AS ID, name AS Brand FROM brands ORDER BY name";
+
+            try
+            {
+                this.GetDbConnection();
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = getBrandsCommand;
+                
+                this.conn.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    results.Columns.AddRange(new DataColumn[2] {
+                        new DataColumn("ID"),
+                        new DataColumn("Brand")
+                    });
+
+                    while (dr.Read())
+                    {
+                        results.Rows.Add(dr["ID"], dr["Brand"]);
+                    }
+                }
+
+                this.conn.Close();
+
+                return results;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetBrands : " + ex.Message + ", stack: " + ex.StackTrace);
+                return results;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public string AddBrand(string name)
+        {
+            try
+            {
+                this.GetDbConnection();
+
+                string addDeviceCommand = "INSERT INTO brands(name) VALUES (@name);";
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = addDeviceCommand;
+                cmd.Parameters.AddWithValue("@name", name);
+                Console.WriteLine("Adding Brand, name: " + name);
+                this.conn.Open();
+                cmd.ExecuteReader();
+                this.conn.Close();
+                Console.WriteLine("Brand Added, name: " + name);
+                return ("Brand : " + name + " Added!!!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Duplicate"))
+                {
+                    Console.WriteLine(ex.Message);
+                    return ("Duplicate code!!!");
+                }
+
+                Console.WriteLine("Error on AddBrand : " + ex.Message + ", stack: " + ex.StackTrace);
+                return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        //Models
+        public DataTable GetModels(int brandId)
+        {
+            DataTable results = new DataTable();
+            string getBrandsCommand = "SELECT id AS ID, name AS Model FROM models WHERE brand_id = @brandId ORDER BY name";
+
+            try
+            {
+                this.GetDbConnection();
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = getBrandsCommand;
+                cmd.Parameters.AddWithValue("@brandId", brandId);
+
+                this.conn.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    results.Columns.AddRange(new DataColumn[2] {
+                        new DataColumn("ID"),
+                        new DataColumn("Model")
+                    });
+
+                    while (dr.Read())
+                    {
+                        results.Rows.Add(dr["ID"], dr["Model"]);
+                    }
+                }
+
+                this.conn.Close();
+
+                return results;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetModels : " + ex.Message + ", stack: " + ex.StackTrace);
+                return results;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public string AddModel(string name, int brandId)
+        {
+            try
+            {
+                this.GetDbConnection();
+
+                string addDeviceCommand = "INSERT INTO models(name, brand_id) VALUES (@name, @brandId);";
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = addDeviceCommand;
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Parameters.AddWithValue("@brandId", brandId);
+                Console.WriteLine("Adding Model, name: " + name + ", brand_id: " + brandId);
+                this.conn.Open();
+                cmd.ExecuteReader();
+                this.conn.Close();
+                Console.WriteLine("Model Added, name: " + name + ", brand_id: " + brandId);
+                return ("Model : " + name + " Added!!!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Duplicate"))
+                {
+                    Console.WriteLine(ex.Message);
+                    return ("Duplicate code!!!");
+                }
+
+                Console.WriteLine("Error on AddModel : " + ex.Message + ", stack: " + ex.StackTrace);
+                return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
     }
 }
