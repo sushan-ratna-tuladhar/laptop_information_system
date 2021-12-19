@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaptopInformationSystem.Helpers
 {
@@ -53,26 +54,42 @@ namespace LaptopInformationSystem.Helpers
         }
 
         //Devices
-        public string AddDevice(string code, string model, string type, string purchasedOn)
+        public string AddDevices(DataTable newDevices)
         {
             try
             {
                 this.GetDbConnection();
 
-                string addDeviceCommand = "INSERT INTO devices(code, model, type, purchased_on) VALUES (@code, @model, @type, @purchasedOn);";
-
-                MySqlCommand cmd = this.conn.CreateCommand();
-                cmd.CommandText = addDeviceCommand;
-                cmd.Parameters.AddWithValue("@code", code);
-                cmd.Parameters.AddWithValue("@model", model);
-                cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@purchasedOn", purchasedOn);
-                Console.WriteLine("Adding Device, code: " + code + ", model: " + model + ", type: " + type + ", purchasedOn: " + purchasedOn.ToString());
+                string addDeviceCommand = "INSERT INTO devices(serial_number, type, purchased_on, purchased_from, sold_to, sold_on, invoice_number, model_id) VALUES (@serial_number, @type, @purchased_on, @purchased_from, @sold_to, @sold_on, @invoice_number, @model_id)";
                 this.conn.Open();
-                cmd.ExecuteReader();
+                foreach (DataRow r in newDevices.Rows)
+                {
+                    string purchasedOn = r["Purchased on"] != null ? r["Purchased on"].ToString() : null;
+                    if (purchasedOn != null)
+                    {
+                        purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+                    }
+                    string soldOn = r["Sold on"] != null ? r["Sold on"].ToString() : null;
+                    if (soldOn != null)
+                    {
+                        soldOn = DateTime.Parse(soldOn).ToString("yyyy-MM-dd");
+                    }
+
+                    MySqlCommand cmd = this.conn.CreateCommand();
+                    cmd.CommandText = addDeviceCommand;
+                    cmd.Parameters.AddWithValue("@serial_number", r["S/N"]);
+                    cmd.Parameters.AddWithValue("@type", r["Type"]);
+                    cmd.Parameters.AddWithValue("@purchased_on", purchasedOn);
+                    cmd.Parameters.AddWithValue("@purchased_from", r["Purchased from"]);
+                    cmd.Parameters.AddWithValue("@sold_to", r["Sold to"]);
+                    cmd.Parameters.AddWithValue("@sold_on", soldOn);
+                    cmd.Parameters.AddWithValue("@invoice_number", r["Invoice number"]);
+                    cmd.Parameters.AddWithValue("@model_id", r["Model"]);
+                    cmd.ExecuteNonQuery();
+                }
                 this.conn.Close();
-                Console.WriteLine("Device Added, code: " + code + ", model: " + model + ", type: " + type + ", purchasedOn: " + purchasedOn.ToString());
-                return ("Device : " + code + " Added!!!");
+                Console.WriteLine("Devices Added, total: " + newDevices.Rows.Count);
+                return (newDevices.Rows.Count + " devices added!!!");
             }
             catch (Exception ex)
             {
@@ -165,16 +182,16 @@ namespace LaptopInformationSystem.Helpers
                             new DataColumn("No."),
                             new DataColumn("ID"),
                             new DataColumn("BrandId"),
-                            new DataColumn("Brand"),
+                            new DataColumn("BrandName"),
                             new DataColumn("ModelId"),
-                            new DataColumn("Model"),
+                            new DataColumn("ModelName"),
                             new DataColumn("S/N"),
                             new DataColumn("Type"),
                             new DataColumn("Purchased from"),
-                            new DataColumn("Purchased on"),
+                            new DataColumn("PurchasedOn"),
                             new DataColumn("Invoice number"),
                             new DataColumn("Sold to"),
-                            new DataColumn("Sold on")
+                            new DataColumn("SoldOn")
                     });
 
                     //Set AutoIncrement True for the First Column.
@@ -222,27 +239,36 @@ namespace LaptopInformationSystem.Helpers
             }
         }
 
-        public string UpdateDevice(int id, string code, string model, string type, string purchasedOn)
+        public string UpdateDevice(int id, string serialNumber, int modelId, string type, string purchasedOn, string purchasedFrom, string soldOn, string soldTo, string invoiceNumber)
         {
             try
             {
                 this.GetDbConnection();
 
-                string addDeviceCommand = "UPDATE devices SET code = @code, model = @model, type = @type, purchased_on = @purchasedOn WHERE id = @id";
+                string addDeviceCommand = 
+                    "UPDATE devices SET " +
+                        "serial_number = @serialNumber, model_id = @modelId, type = @type, purchased_on = @purchasedOn, " +
+                        "purchased_from = @purchasedFrom, sold_on = @soldOn, sold_to = @soldTo, invoice_number = @invoiceNumber " +
+                        "WHERE id = @id";
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = addDeviceCommand;
-                cmd.Parameters.AddWithValue("@code", code);
-                cmd.Parameters.AddWithValue("@model", model);
+                cmd.Parameters.AddWithValue("@serialNumber", serialNumber);
+                cmd.Parameters.AddWithValue("@modelId", modelId);
                 cmd.Parameters.AddWithValue("@type", type);
                 cmd.Parameters.AddWithValue("@purchasedOn", purchasedOn);
+                cmd.Parameters.AddWithValue("@purchasedFrom", purchasedFrom);
+                cmd.Parameters.AddWithValue("@soldOn", soldOn);
+                cmd.Parameters.AddWithValue("@soldTo", soldTo);
+                cmd.Parameters.AddWithValue("@invoiceNumber", invoiceNumber);
                 cmd.Parameters.AddWithValue("@id", id);
-                Console.WriteLine("Updating Device with id : " + id + "- code: " + code + ", model: " + model + ", type: " + type + ", purchasedOn: " + purchasedOn.ToString());
+
+                Console.WriteLine("Updating Device with id : " + id);
                 this.conn.Open();
                 cmd.ExecuteReader();
                 this.conn.Close();
-                Console.WriteLine("Device with id : " + id + " updated, code: " + code + ", model: " + model + ", type: " + type + ", purchasedOn: " + purchasedOn.ToString());
-                return ("Device : " + code + " Updated!!!");
+                Console.WriteLine("Device with id updated : " + id);
+                return ("Device : " + serialNumber + " Updated!!!");
             }
             catch (Exception ex)
             {
@@ -265,23 +291,23 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public string DeleteDevice(string code)
+        public string DeleteDevice(string serialNumber)
         {
             try
             {
                 this.GetDbConnection();
 
-                string addDeviceCommand = "DELETE FROM devices WHERE code = @code";
+                string addDeviceCommand = "DELETE FROM devices WHERE serial_number = @serialNumber";
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = addDeviceCommand;
-                cmd.Parameters.AddWithValue("@code", code);
-                Console.WriteLine("Deleting Device with code : " + code);
+                cmd.Parameters.AddWithValue("@serialNumber", serialNumber);
+                Console.WriteLine("Deleting Device with serial number : " + serialNumber);
                 this.conn.Open();
                 cmd.ExecuteReader();
                 this.conn.Close();
-                Console.WriteLine("Deleted device with code : " + code);
-                return ("Device : " + code + " Deleted!!!");
+                Console.WriteLine("Deleted device with serial number : " + serialNumber);
+                return ("Device : " + serialNumber + " Deleted!!!");
             }
             catch (Exception ex)
             {
@@ -331,6 +357,70 @@ namespace LaptopInformationSystem.Helpers
             {
                 Console.WriteLine("Error on UpdateAccessedDate : " + ex.Message + ", stack: " + ex.StackTrace);
                 return total;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public DataTable GetReport()
+        {
+            DataTable results = new DataTable();
+            string getReportCommand =
+                "SELECT b.name AS Brand, m.name AS Model, COUNT(d.id) AS DeviceCount " +
+                "FROM devices d " +
+                "JOIN models m ON m.id = d.model_id " +
+                "JOIN brands b ON b.id = m.brand_id " +
+                "WHERE COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' OR COALESCE(d.invoice_number,'') = '' " +
+                "GROUP BY b.name, m.name " +
+                "ORDER BY b.name, m.name";
+
+            try
+            {
+                this.GetDbConnection();
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = getReportCommand;
+                this.conn.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    results.Columns.AddRange(new DataColumn[4] {
+                            new DataColumn("No."),
+                            new DataColumn("Brand"),
+                            new DataColumn("Model"),
+                            new DataColumn("Device count")
+                    });
+
+                    //Set AutoIncrement True for the First Column.
+                    results.Columns["No."].AutoIncrement = true;
+
+                    //Set the Starting or Seed value.
+                    results.Columns["No."].AutoIncrementSeed = 1;
+
+                    //Set the Increment value.
+                    results.Columns["No."].AutoIncrementStep = 1;
+                    while (dr.Read())
+                    {
+                        results.Rows.Add(null,
+                            !Convert.IsDBNull(dr["Brand"]) ? dr["Brand"] : "",
+                            !Convert.IsDBNull(dr["Model"]) ? dr["Model"] : "",
+                            !Convert.IsDBNull(dr["DeviceCount"]) ? dr["DeviceCount"] : "");                    
+                    }
+                }
+
+                this.conn.Close();
+
+                return results;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetReport : " + ex.Message + ", stack: " + ex.StackTrace);
+                return results;
             }
             finally
             {
@@ -429,14 +519,20 @@ namespace LaptopInformationSystem.Helpers
         public DataTable GetModels(int brandId)
         {
             DataTable results = new DataTable();
-            string getBrandsCommand = "SELECT id AS ID, name AS Model FROM models WHERE brand_id = @brandId ORDER BY name";
+            string getBrandsCommand = "SELECT id AS ID, name AS Model FROM models";
+            string brandFilter = "";
+
+            if(brandId != 0)
+            {
+                brandFilter = " WHERE brand_id = @brandId ORDER BY name";
+            }
 
             try
             {
                 this.GetDbConnection();
 
                 MySqlCommand cmd = this.conn.CreateCommand();
-                cmd.CommandText = getBrandsCommand;
+                cmd.CommandText = getBrandsCommand + brandFilter;
                 cmd.Parameters.AddWithValue("@brandId", brandId);
 
                 this.conn.Open();

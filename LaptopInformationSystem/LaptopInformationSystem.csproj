@@ -142,6 +142,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\BackgroundTasks.cs" />
+    <Compile Include="Helpers\DataGridGeneric.cs" />
     <Compile Include="DeviceEditForm.cs">
       <SubType>Form</SubType>
     </Compile>

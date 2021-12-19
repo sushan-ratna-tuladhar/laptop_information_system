@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LaptopInformationSystem
@@ -8,8 +11,10 @@ namespace LaptopInformationSystem
     {
         private Helpers.DbHelper db = new Helpers.DbHelper();
         private DataTable devices;
-        private DeviceActionForm deviceAction;
-        private DeviceEditForm deviceEdit;
+        private DataTable brands;
+        private DataTable models;
+        private DataTable report;
+        public DateTimePicker newDateTime;
 
         public MainForm()
         {
@@ -18,11 +23,98 @@ namespace LaptopInformationSystem
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.db.UpdateAccessedDate();
+            Thread Initialize = new Thread(delegate () {
+
+                this.Initialize();
+
+                // Change the status of the buttons inside the TypingThread
+                // This won't throw an exception anymore !
+                if (this.btnShowDevice.InvokeRequired)
+                {
+                    this.btnShowDevice.Invoke(new MethodInvoker(delegate
+                    {
+                        if(this.btnShowDevice.Enabled == false)
+                        {
+                            Cursor.Current = Cursors.WaitCursor;
+
+                            this.btnShowDevice.Enabled = true;
+                            this.btnAddDevice.Enabled = true;
+                            this.btnAddBrand.Enabled = true;
+                            this.btnAddModel.Enabled = true;
+                            if (dataGridCommon.ReadOnly == false)
+                            {
+                                dataGridCommon.ReadOnly = true;
+                            }
+
+                            grpAddComponents.Show();
+                            grpAddComponents.Text = "Report";
+
+                            this.dataGridCommon.Columns.Clear();
+                            this.dataGridCommon.DataSource = this.report;
+                            if (!dataGridCommon.Visible)
+                            {
+                                dataGridCommon.Show();
+                            }
+                            this.dataGridCommon.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                            this.dataGridCommon.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                            this.dataGridCommon.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                            this.dataGridCommon.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+
+                            this.btnSave.Hide();
+                            this.btnCancel.Hide();
+
+                            this.lblLoading.Hide();
+                        }
+                    }));
+                }
+            });
+
+            this.btnShowDevice.Enabled = false;
+            this.btnAddDevice.Enabled = false;
+            this.btnAddBrand.Enabled = false;
+            this.btnAddModel.Enabled = false;
+            this.btnReport.Enabled = false;
+            this.lblLoading.Show();
+
+            Initialize.Start();
+
         }
 
         private void btnShowDevice_Click(object sender, EventArgs e)
         {
+            if (grpShowDevices.Visible)
+            {
+                grpShowDevices.Hide();
+            }
+            if (!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+            if (txtAddBrandName.Visible)
+            {
+                txtAddBrandName.Hide();
+            }
+            if (lblAddBrandModelName.Visible)
+            {
+                lblAddBrandModelName.Hide();
+            }
+            if (lblAddModelBrand.Visible)
+            {
+                lblAddModelBrand.Hide();
+            }
+            if (dropdownAddModelBrand.Visible)
+            {
+                dropdownAddModelBrand.Hide();
+            }
+            if (txtAddModelName.Visible)
+            {
+                txtAddModelName.Hide();
+            }
+            if (dataGridCommon.Visible)
+            {
+                dataGridCommon.Hide();
+            }
+
             if (grpAddComponents.Visible)
             {
                 grpAddComponents.Hide();
@@ -42,14 +134,16 @@ namespace LaptopInformationSystem
             {
                 btnAddBrand.Enabled = true;
             }
+            if (btnReport.Enabled == false)
+            {
+                btnReport.Enabled = true;
+            }
 
             try
             {
-                DataTable brands = this.db.GetBrands();
-
                 dropdownGetDevicesBrand.DisplayMember = "Brand";
                 dropdownGetDevicesBrand.ValueMember = "ID";
-                dropdownGetDevicesBrand.DataSource = brands;
+                dropdownGetDevicesBrand.DataSource = this.brands;
                 dropdownGetDevicesBrand.SelectedItem = null;
 
                 this.txtCodeSearch.Text = "";
@@ -74,6 +168,31 @@ namespace LaptopInformationSystem
             {
                 grpShowDevices.Hide();
             }
+            if(!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+            if (txtAddBrandName.Visible)
+            {
+                txtAddBrandName.Hide();
+            }
+            if (lblAddBrandModelName.Visible)
+            {
+                lblAddBrandModelName.Hide();
+            }
+            if (lblAddModelBrand.Visible)
+            {
+                lblAddModelBrand.Hide();
+            }
+            if (dropdownAddModelBrand.Visible)
+            {
+                dropdownAddModelBrand.Hide();
+            }
+            if (txtAddModelName.Visible)
+            {
+                txtAddModelName.Hide();
+            }
+
             grpAddComponents.Show();
             grpAddComponents.Text = "Add Devices";
             btnAddDevice.Enabled = false;
@@ -90,6 +209,103 @@ namespace LaptopInformationSystem
             {
                 btnAddBrand.Enabled = true;
             }
+            if (btnReport.Enabled == false)
+            {
+                btnReport.Enabled = true;
+            }
+            if (dataGridCommon.ReadOnly == false)
+            {
+                dataGridCommon.ReadOnly = true;
+            }
+
+            if(!this.btnSave.Visible)
+            {
+                this.btnSave.Show();
+            }
+            if(!this.btnCancel.Visible)
+            {
+                this.btnCancel.Show();
+            }
+
+            this.dataGridCommon.Columns.Clear();
+            dataGridCommon.DataSource = null;
+
+            DataGridViewComboBoxColumn modelsComboBox = new DataGridViewComboBoxColumn();
+            {
+                modelsComboBox.DataSource = this.db.GetModels(0);
+                modelsComboBox.Name = "Model";
+                modelsComboBox.DisplayMember = "Model";
+                modelsComboBox.ValueMember = "ID";
+                modelsComboBox.ValueType = typeof(string);
+                dataGridCommon.Columns.Add(modelsComboBox);
+            }
+
+            this.dataGridCommon.Columns.Add("SN", "S/N");
+            this.dataGridCommon.Columns["SN"].ValueType = typeof(string);
+            this.dataGridCommon.Columns.Add("Type", "Type");
+            this.dataGridCommon.Columns["Type"].ValueType = typeof(string);
+            this.dataGridCommon.Columns.Add("PurchasedFrom", "Purchased from");
+            this.dataGridCommon.Columns["PurchasedFrom"].ValueType = typeof(string);
+
+            CalendarColumn purchasedOn = new CalendarColumn();
+            {
+                purchasedOn.Name = "Purchased on";
+                purchasedOn.ValueType = typeof(string);
+                dataGridCommon.Columns.Add(purchasedOn);
+            }
+
+            this.dataGridCommon.Columns.Add("InvoiceNumber", "Invoice number");
+            this.dataGridCommon.Columns["InvoiceNumber"].ValueType = typeof(string);
+            this.dataGridCommon.Columns.Add("SoldTo", "Sold to");
+            this.dataGridCommon.Columns["SoldTo"].ValueType = typeof(string);
+
+            CalendarColumn soldOn = new CalendarColumn();
+            {
+                soldOn.Name = "Sold on";
+                soldOn.ValueType = typeof(DateTime);
+                dataGridCommon.Columns.Add(soldOn);
+            }
+
+            DataGridViewButtonColumn newDevice = new DataGridViewButtonColumn();
+            {
+                newDevice.Name = "btnAddDeviceNew";
+                newDevice.HeaderText = "Add";
+                newDevice.Text = "+";
+                newDevice.UseColumnTextForButtonValue = true;
+                newDevice.DefaultCellStyle.NullValue = "+";
+                newDevice.ValueType = typeof(string);
+                this.dataGridCommon.Columns.Add(newDevice);
+            }
+
+            DataGridViewButtonColumn removeDevice = new DataGridViewButtonColumn();
+            {
+                removeDevice.Name = "btnRemoveDeviceNew";
+                removeDevice.HeaderText = "Remove";
+                removeDevice.Text = "-";
+                removeDevice.UseColumnTextForButtonValue = true;
+                removeDevice.DefaultCellStyle.NullValue = "-";
+                removeDevice.ValueType = typeof(string);
+                this.dataGridCommon.Columns.Add(removeDevice);
+            }
+
+            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["SN"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Type"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["PurchasedFrom"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Purchased on"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["InvoiceNumber"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["SoldTo"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Sold on"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["btnAddDeviceNew"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["btnRemoveDeviceNew"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+
+            if (dataGridCommon.ReadOnly == true)
+            {
+                dataGridCommon.ReadOnly = false;
+            }
+
+            this.dataGridCommon.Rows.Add();
+
         }
 
         private void lblActivities_Click(object sender, EventArgs e)
@@ -239,23 +455,67 @@ namespace LaptopInformationSystem
 
         private void dataGridDevices_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
         {
-            // find out which column was clicked
-            if (this.dataGridDevices.Columns[e.ColumnIndex] == dataGridDevices.Columns[6])
+            int id = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ID"].Value);
+            int modelId = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ModelId"].Value);
+            string serialNo = dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value.ToString() : "";
+            string type = dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value.ToString() : "";
+            string purchasedFrom = dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value.ToString() : "";
+            string purchasedOn = dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value.ToString() : null;
+            if (purchasedOn != null)
             {
-                // display on the new form.
-                this.deviceAction = new DeviceActionForm();
-                EventArgs args = new EventArgs();
+                purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+            }
+            string invoiceNumber = dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value.ToString() : "";
+            string soldTo = dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value.ToString() : "";
+            string soldOn = dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value.ToString() : null;
+            if (soldOn != null)
+            {
+                soldOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+            }
 
-                int id = Convert.ToInt32(this.dataGridDevices.Rows[e.RowIndex].Cells[1].Value.ToString());
-                string code = this.dataGridDevices.Rows[e.RowIndex].Cells[2].Value.ToString();
-                string model = this.dataGridDevices.Rows[e.RowIndex].Cells[3].Value.ToString();
-                string type = this.dataGridDevices.Rows[e.RowIndex].Cells[4].Value.ToString();
-                string purchasedOn = this.dataGridDevices.Rows[e.RowIndex].Cells[5].Value.ToString();
+            // when save button is clicked
+            if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnSave")
+            {
+                string result = this.db.UpdateDevice(id, serialNo, modelId, type, purchasedOn, purchasedFrom, soldOn, soldTo, invoiceNumber);
 
-                deviceAction.onBtnEditClick += (_sender, _e) => edit_onBtnEditClick(sender, e, id, code, model, type, purchasedOn);
-                deviceAction.onBtnDeleteClick += (_sender, _e) => action_onBtnDeleteClick(sender, e, code);
+                DialogResult dialogResult = MessageBox.Show(result, "Update", MessageBoxButtons.OK);
+            }
 
-                deviceAction.ShowDialog();
+            //when delete button is clicked
+            if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnDelete")
+            {
+                DialogResult dialogResult = MessageBox.Show("Delete device " + serialNo + "?", "Delete", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    string result = this.db.DeleteDevice(serialNo);
+                    DialogResult dialogResultDeleted = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
+
+                    if (dialogResultDeleted == DialogResult.OK)
+                    {
+                        this.showData(Convert.ToInt32(this.txtPageNo.Text), 20, "", 0, "");
+                        this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices("", 0));
+                    }
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                }
+            }
+        }
+
+        private void dataGridAddDevices_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //when delete button is clickedf
+            if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnAddDeviceNew")
+            {
+                this.dataGridCommon.Rows.Add();
+            }
+
+            if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnRemoveDeviceNew")
+            {
+                if(dataGridCommon.Rows.Count > 1)
+                {
+                    this.dataGridCommon.Rows.RemoveAt(dataGridCommon.CurrentRow.Index);
+                }
             }
         }
 
@@ -318,7 +578,6 @@ namespace LaptopInformationSystem
             {
                 grpShowDevices.Hide();
             }
-
             if (txtAddModelName.Visible)
             {
                 txtAddModelName.Hide();
@@ -330,6 +589,22 @@ namespace LaptopInformationSystem
             if (dropdownAddModelBrand.Visible)
             {
                 dropdownAddModelBrand.Hide();
+            }
+            if (dataGridCommon.Visible)
+            {
+                dataGridCommon.Hide();
+            }
+            if (!lblAddBrandModelName.Visible)
+            {
+                lblAddBrandModelName.Show();
+            }
+            if (!this.btnSave.Visible)
+            {
+                this.btnSave.Show();
+            }
+            if (!this.btnCancel.Visible)
+            {
+                this.btnCancel.Show();
             }
 
             grpAddComponents.Show();
@@ -351,6 +626,10 @@ namespace LaptopInformationSystem
             {
                 btnAddModel.Enabled = true;
             }
+            if (btnReport.Enabled == false)
+            {
+                btnReport.Enabled = true;
+            }
         }
 
         private void btnAddModel_Click(object sender, EventArgs e)
@@ -359,10 +638,29 @@ namespace LaptopInformationSystem
             {
                 grpShowDevices.Hide();
             }
-
             if (txtAddBrandName.Visible)
             {
                 txtAddBrandName.Hide();
+            }
+            if (dataGridCommon.Visible)
+            {
+                dataGridCommon.Hide();
+            }
+            if (!lblAddBrandModelName.Visible)
+            {
+                lblAddBrandModelName.Show();
+            }
+            if (btnReport.Enabled == false)
+            {
+                btnReport.Enabled = true;
+            }
+            if (!this.btnSave.Visible)
+            {
+                this.btnSave.Show();
+            }
+            if (!this.btnCancel.Visible)
+            {
+                this.btnCancel.Show();
             }
 
             grpAddComponents.Show();
@@ -373,7 +671,7 @@ namespace LaptopInformationSystem
             grpAddComponents.Text = "Add Model";
             btnAddModel.Enabled = false;
 
-            DataTable brands = this.db.GetBrands();
+            DataTable brands = this.brands;
 
             dropdownAddModelBrand.DisplayMember = "Brand";
             dropdownAddModelBrand.ValueMember = "ID";
@@ -404,12 +702,56 @@ namespace LaptopInformationSystem
                 string result = this.db.AddModel(modelName, brandId);
 
                 MessageBox.Show(result, "Model Added", MessageBoxButtons.OK);
-            } else
+
+                Thread LoadBrands = new Thread(delegate () {
+                    this.brands = this.db.GetBrands();
+                });
+
+                LoadBrands.Start();
+
+            } else if(txtAddBrandName.Visible)
             {
                 string brandName = txtAddBrandName.Text.Trim();
                 string result = this.db.AddBrand(brandName);
 
                 MessageBox.Show(result, "Brand Added", MessageBoxButtons.OK);
+
+                Thread LoadModels = new Thread(delegate () {
+                    this.brands = this.db.GetModels(0);
+                });
+
+                LoadModels.Start();
+            } else if(dataGridCommon.Visible)
+            {
+                DataTable newDevices = new DataTable();
+                //Adding the Columns.
+                foreach (DataGridViewColumn column in dataGridCommon.Columns)
+                {
+                    newDevices.Columns.Add(column.HeaderText, column.ValueType);
+                }
+
+                //Adding the Rows.
+                foreach (DataGridViewRow row in dataGridCommon.Rows)
+                {
+                    newDevices.Rows.Add();
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        if(cell.ValueType == typeof(DateTime))
+                        {
+                            newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "01/01/1999";
+                        } else
+                        {
+                            newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "";
+                        }
+                    }
+                }
+
+                DataRow[] filteredDevices = newDevices.Select("[S/N] <> '' AND Model <> ''");
+                DataTable filteredDevicesTable = filteredDevices.CopyToDataTable();
+
+                string result = this.db.AddDevices(filteredDevicesTable);
+
+                MessageBox.Show(result, "Devices Added", MessageBoxButtons.OK);
             }
         }
 
@@ -424,84 +766,10 @@ namespace LaptopInformationSystem
             dropdownGetDevicesModel.ValueMember = "ID";
         }
 
-        //Custom functions
-        void edit_onBtnEditClick(object sender, EventArgs e, int id, string code, string model, string type, string purchasedOn)
-        {
-            this.deviceAction.Close();
-            this.deviceEdit = new DeviceEditForm(code, model, type, purchasedOn);
-            EventArgs args = new EventArgs();
-
-            deviceEdit.onBtnSaveClick += (_sender, _e) => edit_onBtnSaveClick(sender, e, id);
-            deviceEdit.ShowDialog();
-        }
-
-        void edit_onBtnSaveClick(object sender, EventArgs e, int id)
-        {
-            try
-            {
-                string changedCode = deviceEdit.txtCodeEdit.Text.Trim();
-                string changedModel = deviceEdit.txtModelEdit.Text.Trim();
-                string changedType = deviceEdit.dropdownTypeEdit.Text.Trim();
-                string changedPurchasedOn = deviceEdit.dateTimePickerPurchasedOnEdit.Value.ToString("yyyy-MM-dd");
-
-                DialogResult dialogResult = MessageBox.Show("Update device?", "Update", MessageBoxButtons.YesNo);
-
-                if (dialogResult == DialogResult.Yes)
-                {
-                    string result = this.db.UpdateDevice(id, changedCode, changedModel, changedType, changedPurchasedOn);
-                    DialogResult dialogResultUpdated = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
-
-                    if (dialogResultUpdated == DialogResult.OK)
-                    {
-                        this.deviceEdit.Close();
-                        this.showData(1, 20, "", 0, "");
-                    }
-                }
-                else if (dialogResult == DialogResult.No)
-                {
-                    this.deviceEdit.Close();
-                    this.showData(1, 20, "", 0, "");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error on EditDevice: " + ex.Message + ", stack: " + ex.StackTrace);
-                MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
-            }
-        }
-
-        void action_onBtnDeleteClick(object sender, EventArgs e, string code)
-        {
-            try
-            {
-                DialogResult dialogResult = MessageBox.Show("Delete device " + code, "Delete", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    string result = this.db.DeleteDevice(code);
-                    DialogResult dialogResultDeleted = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
-
-                    if (dialogResultDeleted == DialogResult.OK)
-                    {
-                        this.deviceAction.Close();
-                        this.showData(1, 20, "", 0, "");
-                        this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices("", 0));
-                    }
-                }
-                else if (dialogResult == DialogResult.No)
-                {
-                    this.deviceAction.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error on DeleteDevice: " + ex.Message + ", stack: " + ex.StackTrace);
-                MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
-            }
-        }
-
         void showData(int pageNumber, int pageSize, string search, int modelId, string type)
         {
             this.dataGridDevices.Columns.Clear();
+
             int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId));
             int remainingPages = 0;
 
@@ -561,16 +829,95 @@ namespace LaptopInformationSystem
 
             this.dataGridDevices.DataSource = this.devices;
 
+            DataGridViewComboBoxColumn brandsComboBox = new DataGridViewComboBoxColumn();
+            {
+                brandsComboBox.DataSource = this.brands;
+                brandsComboBox.Name = "Brand";
+                brandsComboBox.DisplayMember = "Brand";
+                brandsComboBox.ValueMember = "ID";
+                this.dataGridDevices.Columns["BrandName"].Visible = false;
+                this.dataGridDevices.Columns.Insert(2, brandsComboBox);
+
+                foreach (DataGridViewRow row in this.dataGridDevices.Rows)
+                {
+                    row.Cells["Brand"].Value = row.Cells["BrandId"].Value;
+                }
+            }
+
+            DataGridViewComboBoxColumn modelsComboBox = new DataGridViewComboBoxColumn();
+            {
+                modelsComboBox.DataSource = this.models;
+                modelsComboBox.Name = "Model";
+                modelsComboBox.DisplayMember = "Model";
+                modelsComboBox.ValueMember = "ID";
+                this.dataGridDevices.Columns["ModelName"].Visible = false;
+                this.dataGridDevices.Columns.Insert(3, modelsComboBox);
+
+                foreach (DataGridViewRow row in this.dataGridDevices.Rows)
+                {
+                    row.Cells["Model"].Value = row.Cells["ModelId"].Value;
+                }
+            }
+
+            CalendarColumn purchasedOn = new CalendarColumn();
+            {
+                purchasedOn.Name = "Purchased on";
+                this.dataGridDevices.Columns.Insert(10, purchasedOn);
+                this.dataGridDevices.Columns["PurchasedOn"].Visible = false;
+
+                foreach (DataGridViewRow row in this.dataGridDevices.Rows)
+                {
+                    try
+                    {
+                        row.Cells["Purchased on"].Value = DateTime.ParseExact(row.Cells["PurchasedOn"].Value.ToString(), "dd/MM/yyyy", null);
+                    } catch
+                    {
+                        row.Cells["Purchased on"].Value = null;
+                    }
+                }
+            }
+
+            CalendarColumn soldOn = new CalendarColumn();
+            {
+                soldOn.Name = "Sold on";
+                this.dataGridDevices.Columns.Insert(14, soldOn);
+                this.dataGridDevices.Columns["SoldOn"].Visible = false;
+
+                foreach (DataGridViewRow row in this.dataGridDevices.Rows)
+                {
+                    try
+                    {
+                        row.Cells["Sold on"].Value = DateTime.ParseExact(row.Cells["SoldOn"].Value.ToString(), "dd/MM/yyyy", null);
+                    }
+                    catch
+                    {
+                        row.Cells["Sold on"].Value = null;
+                    }
+                }
+            }
+
             DataGridViewButtonColumn button = new DataGridViewButtonColumn();
             {
-                button.Name = "btnAction";
+                button.Name = "btnSave";
                 button.HeaderText = "";
-                button.Text = "Action";
+                button.Text = "Save";
                 button.UseColumnTextForButtonValue = true;
                 this.dataGridDevices.Columns.Add(button);
             }
 
+            DataGridViewButtonColumn button2 = new DataGridViewButtonColumn();
+            {
+                button2.Name = "btnDelete";
+                button2.HeaderText = "";
+                button2.Text = "Delete";
+                button2.UseColumnTextForButtonValue = true;
+                this.dataGridDevices.Columns.Add(button2);
+            }
+
             this.dataGridDevices.Columns["ID"].Visible = false;
+            this.dataGridDevices.Columns["BrandId"].Visible = false;
+            this.dataGridDevices.Columns["ModelId"].Visible = false;
+
             this.lblTotalValue.Text = Convert.ToString(total);
             this.dataGridDevices.Show();
         }
@@ -580,5 +927,94 @@ namespace LaptopInformationSystem
 
         }
 
+        private void Initialize()
+        {
+            this.db.UpdateAccessedDate();
+            this.brands = this.db.GetBrands();
+            this.models = this.db.GetModels(0);
+            this.report = this.db.GetReport();
+        }
+
+        private void btnReport_Click(object sender, EventArgs e)
+        {
+            if (btnReport.Enabled == true)
+            {
+                btnReport.Enabled = false;
+            }
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+
+            if (dataGridCommon.ReadOnly == false)
+            {
+                dataGridCommon.ReadOnly = true;
+            }
+            if (grpShowDevices.Visible)
+            {
+                grpShowDevices.Hide();
+            }
+
+            if (!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+            if (txtAddBrandName.Visible)
+            {
+                txtAddBrandName.Hide();
+            }
+            if (lblAddBrandModelName.Visible)
+            {
+                lblAddBrandModelName.Hide();
+            }
+            if (lblAddModelBrand.Visible)
+            {
+                lblAddModelBrand.Hide();
+            }
+            if (dropdownAddModelBrand.Visible)
+            {
+                dropdownAddModelBrand.Hide();
+            }
+            if (txtAddModelName.Visible)
+            {
+                txtAddModelName.Hide();
+            }
+            if (this.btnSave.Visible)
+            {
+                this.btnSave.Hide();
+            }
+            if (this.btnCancel.Visible)
+            {
+                this.btnCancel.Hide();
+            }
+
+            grpAddComponents.Show();
+            grpAddComponents.Text = "Report";
+            this.report = this.db.GetReport();
+            this.dataGridCommon.Columns.Clear();
+            this.dataGridCommon.DataSource = this.report;
+
+            this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["Device count"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+
+            if (!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+        }
     }
 }
