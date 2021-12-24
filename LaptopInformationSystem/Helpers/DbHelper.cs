@@ -182,7 +182,7 @@ namespace LaptopInformationSystem.Helpers
                             new DataColumn("No."),
                             new DataColumn("ID"),
                             new DataColumn("BrandId"),
-                            new DataColumn("BrandName"),
+                            new DataColumn("Brand"),
                             new DataColumn("ModelId"),
                             new DataColumn("ModelName"),
                             new DataColumn("S/N"),
@@ -372,10 +372,10 @@ namespace LaptopInformationSystem.Helpers
             DataTable results = new DataTable();
             string getReportCommand =
                 "SELECT b.name AS Brand, m.name AS Model, COUNT(d.id) AS DeviceCount " +
-                "FROM devices d " +
-                "JOIN models m ON m.id = d.model_id " +
-                "JOIN brands b ON b.id = m.brand_id " +
-                "WHERE COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' OR COALESCE(d.invoice_number,'') = '' " +
+                "FROM brands b " +
+                "JOIN models m ON m.brand_id = b.id " +
+                "LEFT JOIN devices d ON d.model_id = m.id " +
+                "WHERE COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' OR COALESCE(d.invoice_number,'') = '' AND COALESCE(m.name,'') <> '' " +
                 "GROUP BY b.name, m.name " +
                 "ORDER BY b.name, m.name";
 

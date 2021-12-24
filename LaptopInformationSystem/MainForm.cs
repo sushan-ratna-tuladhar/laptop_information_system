@@ -82,43 +82,16 @@ namespace LaptopInformationSystem
 
         private void btnShowDevice_Click(object sender, EventArgs e)
         {
-            if (grpShowDevices.Visible)
-            {
-                grpShowDevices.Hide();
-            }
-            if (!dataGridCommon.Visible)
-            {
-                dataGridCommon.Show();
-            }
-            if (txtAddBrandName.Visible)
-            {
-                txtAddBrandName.Hide();
-            }
-            if (lblAddBrandModelName.Visible)
-            {
-                lblAddBrandModelName.Hide();
-            }
-            if (lblAddModelBrand.Visible)
-            {
-                lblAddModelBrand.Hide();
-            }
-            if (dropdownAddModelBrand.Visible)
-            {
-                dropdownAddModelBrand.Hide();
-            }
-            if (txtAddModelName.Visible)
-            {
-                txtAddModelName.Hide();
-            }
-            if (dataGridCommon.Visible)
-            {
-                dataGridCommon.Hide();
-            }
-
-            if (grpAddComponents.Visible)
-            {
-                grpAddComponents.Hide();
-            }
+            grpShowDevices.Hide();
+            dataGridCommon.Show();
+            txtAddBrandName.Hide();
+            lblAddBrandModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            txtAddModelName.Hide();
+            dataGridCommon.Hide();
+            
+            grpAddComponents.Hide();
             grpShowDevices.Show();
             btnShowDevice.Enabled = false;
 
@@ -164,34 +137,13 @@ namespace LaptopInformationSystem
 
         private void btnAddDevice_Click(object sender, EventArgs e)
         {
-            if(grpShowDevices.Visible)
-            {
-                grpShowDevices.Hide();
-            }
-            if(!dataGridCommon.Visible)
-            {
-                dataGridCommon.Show();
-            }
-            if (txtAddBrandName.Visible)
-            {
-                txtAddBrandName.Hide();
-            }
-            if (lblAddBrandModelName.Visible)
-            {
-                lblAddBrandModelName.Hide();
-            }
-            if (lblAddModelBrand.Visible)
-            {
-                lblAddModelBrand.Hide();
-            }
-            if (dropdownAddModelBrand.Visible)
-            {
-                dropdownAddModelBrand.Hide();
-            }
-            if (txtAddModelName.Visible)
-            {
-                txtAddModelName.Hide();
-            }
+            grpShowDevices.Hide();
+            dataGridCommon.Show();
+            txtAddBrandName.Hide();
+            lblAddBrandModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            txtAddModelName.Hide();
 
             grpAddComponents.Show();
             grpAddComponents.Text = "Add Devices";
@@ -218,15 +170,9 @@ namespace LaptopInformationSystem
                 dataGridCommon.ReadOnly = true;
             }
 
-            if(!this.btnSave.Visible)
-            {
-                this.btnSave.Show();
-            }
-            if(!this.btnCancel.Visible)
-            {
-                this.btnCancel.Show();
-            }
-
+            this.btnSave.Show();
+            this.btnCancel.Show();
+            
             this.dataGridCommon.Columns.Clear();
             dataGridCommon.DataSource = null;
 
@@ -507,7 +453,19 @@ namespace LaptopInformationSystem
             //when delete button is clickedf
             if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnAddDeviceNew")
             {
-                this.dataGridCommon.Rows.Add();
+                int count = this.dataGridCommon.Rows.Count - 1;
+                this.dataGridCommon.Rows.Add(
+                    dataGridCommon.Rows[count].Cells[0].Value,
+                    "",
+                    dataGridCommon.Rows[count].Cells[2].Value,
+                    dataGridCommon.Rows[count].Cells[3].Value,
+                    dataGridCommon.Rows[count].Cells[4].Value,
+                    dataGridCommon.Rows[count].Cells[5].Value,
+                    "",
+                    "",
+                    "",
+                    ""
+                );
             }
 
             if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnRemoveDeviceNew")
@@ -574,39 +532,15 @@ namespace LaptopInformationSystem
 
         private void btnAddBrand_Click(object sender, EventArgs e)
         {
-            if (grpShowDevices.Visible)
-            {
-                grpShowDevices.Hide();
-            }
-            if (txtAddModelName.Visible)
-            {
-                txtAddModelName.Hide();
-            }
-            if (lblAddModelBrand.Visible)
-            {
-                lblAddModelBrand.Hide();
-            }
-            if (dropdownAddModelBrand.Visible)
-            {
-                dropdownAddModelBrand.Hide();
-            }
-            if (dataGridCommon.Visible)
-            {
-                dataGridCommon.Hide();
-            }
-            if (!lblAddBrandModelName.Visible)
-            {
-                lblAddBrandModelName.Show();
-            }
-            if (!this.btnSave.Visible)
-            {
-                this.btnSave.Show();
-            }
-            if (!this.btnCancel.Visible)
-            {
-                this.btnCancel.Show();
-            }
-
+            grpShowDevices.Hide();
+            txtAddModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            dataGridCommon.Hide();
+            lblAddBrandModelName.Show();
+            this.btnSave.Show();
+            this.btnCancel.Show();
+            
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
             txtAddBrandName.Show();
@@ -634,35 +568,14 @@ namespace LaptopInformationSystem
 
         private void btnAddModel_Click(object sender, EventArgs e)
         {
-            if (grpShowDevices.Visible)
-            {
-                grpShowDevices.Hide();
-            }
-            if (txtAddBrandName.Visible)
-            {
-                txtAddBrandName.Hide();
-            }
-            if (dataGridCommon.Visible)
-            {
-                dataGridCommon.Hide();
-            }
-            if (!lblAddBrandModelName.Visible)
-            {
-                lblAddBrandModelName.Show();
-            }
-            if (btnReport.Enabled == false)
-            {
-                btnReport.Enabled = true;
-            }
-            if (!this.btnSave.Visible)
-            {
-                this.btnSave.Show();
-            }
-            if (!this.btnCancel.Visible)
-            {
-                this.btnCancel.Show();
-            }
-
+            grpShowDevices.Hide();
+            txtAddBrandName.Hide();
+            dataGridCommon.Hide();
+            lblAddBrandModelName.Show();
+            btnReport.Enabled = true;
+            this.btnSave.Show();
+            this.btnCancel.Show();
+            
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
             txtAddModelName.Show();
@@ -829,20 +742,23 @@ namespace LaptopInformationSystem
 
             this.dataGridDevices.DataSource = this.devices;
 
-            DataGridViewComboBoxColumn brandsComboBox = new DataGridViewComboBoxColumn();
-            {
-                brandsComboBox.DataSource = this.brands;
-                brandsComboBox.Name = "Brand";
-                brandsComboBox.DisplayMember = "Brand";
-                brandsComboBox.ValueMember = "ID";
-                this.dataGridDevices.Columns["BrandName"].Visible = false;
-                this.dataGridDevices.Columns.Insert(2, brandsComboBox);
+            this.dataGridDevices.Columns["No."].ReadOnly = true;
+            this.dataGridDevices.Columns["Brand"].ReadOnly = true;
 
-                foreach (DataGridViewRow row in this.dataGridDevices.Rows)
-                {
-                    row.Cells["Brand"].Value = row.Cells["BrandId"].Value;
-                }
-            }
+            //DataGridViewComboBoxColumn brandsComboBox = new DataGridViewComboBoxColumn();
+            //{
+            //    brandsComboBox.DataSource = this.brands;
+            //    brandsComboBox.Name = "Brand";
+            //    brandsComboBox.DisplayMember = "Brand";
+            //    brandsComboBox.ValueMember = "ID";
+            //    this.dataGridDevices.Columns["BrandName"].Visible = false;
+            //    this.dataGridDevices.Columns.Insert(2, brandsComboBox);
+
+            //    foreach (DataGridViewRow row in this.dataGridDevices.Rows)
+            //    {
+            //        row.Cells["Brand"].Value = row.Cells["BrandId"].Value;
+            //    }
+            //}
 
             DataGridViewComboBoxColumn modelsComboBox = new DataGridViewComboBoxColumn();
             {
@@ -851,7 +767,7 @@ namespace LaptopInformationSystem
                 modelsComboBox.DisplayMember = "Model";
                 modelsComboBox.ValueMember = "ID";
                 this.dataGridDevices.Columns["ModelName"].Visible = false;
-                this.dataGridDevices.Columns.Insert(3, modelsComboBox);
+                this.dataGridDevices.Columns.Insert(4, modelsComboBox);
 
                 foreach (DataGridViewRow row in this.dataGridDevices.Rows)
                 {
@@ -962,44 +878,17 @@ namespace LaptopInformationSystem
             {
                 dataGridCommon.ReadOnly = true;
             }
-            if (grpShowDevices.Visible)
-            {
-                grpShowDevices.Hide();
-            }
 
-            if (!dataGridCommon.Visible)
-            {
-                dataGridCommon.Show();
-            }
-            if (txtAddBrandName.Visible)
-            {
-                txtAddBrandName.Hide();
-            }
-            if (lblAddBrandModelName.Visible)
-            {
-                lblAddBrandModelName.Hide();
-            }
-            if (lblAddModelBrand.Visible)
-            {
-                lblAddModelBrand.Hide();
-            }
-            if (dropdownAddModelBrand.Visible)
-            {
-                dropdownAddModelBrand.Hide();
-            }
-            if (txtAddModelName.Visible)
-            {
-                txtAddModelName.Hide();
-            }
-            if (this.btnSave.Visible)
-            {
-                this.btnSave.Hide();
-            }
-            if (this.btnCancel.Visible)
-            {
-                this.btnCancel.Hide();
-            }
-
+            grpShowDevices.Hide();
+            dataGridCommon.Show();
+            txtAddBrandName.Hide();
+            lblAddBrandModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            txtAddModelName.Hide();
+            this.btnSave.Hide();
+            this.btnCancel.Hide();
+            
             grpAddComponents.Show();
             grpAddComponents.Text = "Report";
             this.report = this.db.GetReport();
