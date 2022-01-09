@@ -79,7 +79,7 @@ public class CalendarCell : DataGridViewTextBoxCell
         get
         {
             // Use the current date and time as the default value.
-            return DateTime.Parse("01/01/1999");
+            return DateTime.Parse("01/01/2020");
         }
     }
 }
@@ -118,7 +118,7 @@ class CalendarEditingControl : DateTimePicker, IDataGridViewEditingControl
                     // In the case of an exception, just use the
                     // default value so we're not left with a null
                     // value.
-                    this.Value = DateTime.Parse("01/01/1999");
+                    this.Value = DateTime.Parse("01/01/2020");
                 }
             }
         }

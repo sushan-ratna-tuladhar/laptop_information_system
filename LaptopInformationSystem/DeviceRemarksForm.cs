@@ -10,22 +10,20 @@ using System.Windows.Forms;
 
 namespace LaptopInformationSystem
 {
-    public partial class DeviceEditForm : Form
+    public partial class DeviceRemarksForm : Form
     {
         public event EventHandler onBtnSaveClick;
 
-        public DeviceEditForm()
+        public DeviceRemarksForm()
         {
             InitializeComponent();
         }
 
-        public DeviceEditForm(string code, string model, string type, string purchasedOn)
+        public DeviceRemarksForm(string updateRemarks, string repairRemarks)
         {
             InitializeComponent();
-            this.txtCodeEdit.Text = code;
-            this.txtModelEdit.Text = model;
-            this.dropdownTypeEdit.Text = type;
-            this.dateTimePickerPurchasedOnEdit.Value = DateTime.ParseExact(purchasedOn, "dd/MM/yyyy", null);
+            this.txtUpdateRemarksEdit.Text = updateRemarks;
+            this.txtRepairRemarksEdit.Text = repairRemarks;
         }
 
         private void txtCodeEdit_TextChanged(object sender, EventArgs e)

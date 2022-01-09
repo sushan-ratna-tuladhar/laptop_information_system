@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -58,22 +59,39 @@ namespace LaptopInformationSystem.Helpers
         {
             try
             {
-                this.GetDbConnection();
-
-                string addDeviceCommand = "INSERT INTO devices(serial_number, type, purchased_on, purchased_from, sold_to, sold_on, invoice_number, model_id) VALUES (@serial_number, @type, @purchased_on, @purchased_from, @sold_to, @sold_on, @invoice_number, @model_id)";
-                this.conn.Open();
+                string addDeviceCommand = "INSERT INTO devices(serial_number, type, purchased_on, purchased_from, sold_on, buyer_id, invoice_number, model_id) VALUES (@serial_number, @type, @purchased_on, @purchased_from, @sold_on, @buyer_id, @invoice_number, @model_id)";
                 foreach (DataRow r in newDevices.Rows)
                 {
-                    string purchasedOn = r["Purchased on"] != null ? r["Purchased on"].ToString() : null;
+                    int? soldToId;
+
+                    soldToId = r["Sold to"] != null ? this.GetSoldToId(r["Sold to"].ToString()) : null;
+
+                    string purchasedOn = r["Purchased on"] != null ? r["Purchased on"].ToString().Split(' ')[0] : null;
                     if (purchasedOn != null)
                     {
-                        purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+                        try
+                        {
+                            purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+                        }
+                        catch
+                        {
+                            purchasedOn = null;
+                        }
                     }
-                    string soldOn = r["Sold on"] != null ? r["Sold on"].ToString() : null;
+                    string soldOn = r["Sold on"] != null ? r["Sold on"].ToString().Split(' ')[0] : null;
                     if (soldOn != null)
                     {
-                        soldOn = DateTime.Parse(soldOn).ToString("yyyy-MM-dd");
+                        try
+                        {
+                            soldOn = DateTime.Parse(soldOn).ToString("yyyy-MM-dd");
+                        }
+                        catch
+                        {
+                            soldOn = null;
+                        }
                     }
+
+                    this.GetDbConnection();
 
                     MySqlCommand cmd = this.conn.CreateCommand();
                     cmd.CommandText = addDeviceCommand;
@@ -81,13 +99,16 @@ namespace LaptopInformationSystem.Helpers
                     cmd.Parameters.AddWithValue("@type", r["Type"]);
                     cmd.Parameters.AddWithValue("@purchased_on", purchasedOn);
                     cmd.Parameters.AddWithValue("@purchased_from", r["Purchased from"]);
-                    cmd.Parameters.AddWithValue("@sold_to", r["Sold to"]);
+                    cmd.Parameters.AddWithValue("@buyer_id", soldToId);
                     cmd.Parameters.AddWithValue("@sold_on", soldOn);
                     cmd.Parameters.AddWithValue("@invoice_number", r["Invoice number"]);
                     cmd.Parameters.AddWithValue("@model_id", r["Model"]);
+
+                    this.conn.Open();
                     cmd.ExecuteNonQuery();
+                    this.conn.Close();
                 }
-                this.conn.Close();
+
                 Console.WriteLine("Devices Added, total: " + newDevices.Rows.Count);
                 return (newDevices.Rows.Count + " devices added!!!");
             }
@@ -112,6 +133,64 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
+        public string UpdateSoldDevices(DataTable soldDevices, string soldTo, string soldOn)
+        {
+            try
+            {
+                int? soldToId = this.GetSoldToId(soldTo);
+
+                string updateDeviceCommand = "UPDATE devices SET sold_on = @soldOn, buyer_id = @soldToId WHERE TRIM(LOWER(serial_number)) = TRIM(LOWER(@sn));";
+                foreach (DataRow r in soldDevices.Rows)
+                {
+                    soldOn = soldOn != null ? soldOn.ToString().Split(' ')[0] : null;
+                    if (soldOn != null)
+                    {
+                        try
+                        {
+                            soldOn = DateTime.Parse(soldOn).ToString("yyyy-MM-dd");
+                        }
+                        catch
+                        {
+                            soldOn = null;
+                        }
+                    }
+
+                    this.GetDbConnection();
+
+                    MySqlCommand cmd = this.conn.CreateCommand();
+                    cmd.CommandText = updateDeviceCommand;
+                    cmd.Parameters.AddWithValue("@soldOn", soldOn);
+                    cmd.Parameters.AddWithValue("@soldToId", soldToId);
+                    cmd.Parameters.AddWithValue("@sn", r["S/N"]);
+
+                    this.conn.Open();
+                    cmd.ExecuteNonQuery();
+                    this.conn.Close();
+                }
+                Console.WriteLine("Devices Sold, total: " + soldDevices.Rows.Count);
+                return (soldDevices.Rows.Count + " devices sold!!!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Duplicate"))
+                {
+                    Console.WriteLine(ex.Message);
+                    return ("Duplicate code!!!");
+                }
+
+                Console.WriteLine("Error on UpdateSoldDevices : " + ex.Message + ", stack: " + ex.StackTrace);
+                return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+
+        }
+
         public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir)
         {
             DataTable results = new DataTable();
@@ -120,10 +199,11 @@ namespace LaptopInformationSystem.Helpers
             string searchCommand = "";
             string getDevicesCommand = 
                 "SELECT d.id AS ID, b.id AS BrandId, b.name AS Brand, m.id AS ModelId, m.name AS Model, d.serial_number AS SN, d.type AS Type, d.purchased_from AS PurchasedFrom, purchased_on AS PurchasedOn, " +
-                "d.invoice_number AS InvoiceNumber, d.sold_to AS SoldTo, d.sold_on AS SoldOn " + 
+                "d.invoice_number AS InvoiceNumber, buy.id AS BuyerId, buy.name AS SoldTo, d.sold_on AS SoldOn, d.update_remarks AS UpdateRemarks, d.repair_remarks AS RepairRemarks " + 
                 "FROM devices d " + 
                 "JOIN models m ON m.id = d.model_id " + 
-                "JOIN brands b ON b.id = m.brand_id " + 
+                "JOIN brands b ON b.id = m.brand_id " +
+                "LEFT JOIN buyers buy ON buy.id = d.buyer_id " +
                 "WHERE 1=1 ";
             string pagingCommand = " LIMIT " + pageSize + " OFFSET " + offset;
             string orderByCommand = "";
@@ -178,7 +258,7 @@ namespace LaptopInformationSystem.Helpers
                 this.conn.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    results.Columns.AddRange(new DataColumn[13] {
+                    results.Columns.AddRange(new DataColumn[16] {
                             new DataColumn("No."),
                             new DataColumn("ID"),
                             new DataColumn("BrandId"),
@@ -190,8 +270,11 @@ namespace LaptopInformationSystem.Helpers
                             new DataColumn("Purchased from"),
                             new DataColumn("PurchasedOn"),
                             new DataColumn("Invoice number"),
+                            new DataColumn("BuyerId"),
                             new DataColumn("Sold to"),
-                            new DataColumn("SoldOn")
+                            new DataColumn("SoldOn"),
+                            new DataColumn("UpdateRemarks"),
+                            new DataColumn("RepairRemarks")
                     });
 
                     //Set AutoIncrement True for the First Column.
@@ -215,8 +298,11 @@ namespace LaptopInformationSystem.Helpers
                             !Convert.IsDBNull(dr["PurchasedFrom"]) ? dr["PurchasedFrom"] : "",
                             !Convert.IsDBNull(dr["PurchasedOn"]) ? Convert.ToDateTime(dr["PurchasedOn"]).ToString("dd/MM/yyyy") : "",
                             !Convert.IsDBNull(dr["InvoiceNumber"]) ? dr["InvoiceNumber"] : "",
+                            !Convert.IsDBNull(dr["BuyerId"]) ? dr["BuyerId"] : "",
                             !Convert.IsDBNull(dr["SoldTo"]) ? dr["SoldTo"] : "",
-                            !Convert.IsDBNull(dr["SoldOn"]) ? Convert.ToDateTime(dr["SoldOn"]).ToString("dd/MM/yyyy") : "");
+                            !Convert.IsDBNull(dr["SoldOn"]) ? Convert.ToDateTime(dr["SoldOn"]).ToString("dd/MM/yyyy") : "",
+                            !Convert.IsDBNull(dr["UpdateRemarks"]) ? dr["UpdateRemarks"] : "",
+                            !Convert.IsDBNull(dr["RepairRemarks"]) ? dr["RepairRemarks"] : "");
                     }
                 }
 
@@ -239,16 +325,109 @@ namespace LaptopInformationSystem.Helpers
             }
         }
 
-        public string UpdateDevice(int id, string serialNumber, int modelId, string type, string purchasedOn, string purchasedFrom, string soldOn, string soldTo, string invoiceNumber)
+        public DataTable GetDevicesForSoldOut(string serial)
+        {
+            DataTable results = new DataTable();
+            string getDevicesCommand =
+                "SELECT d.id AS ID, b.id AS BrandId, b.name AS Brand, m.id AS ModelId, m.name AS Model, d.serial_number AS SN, d.type AS Type, d.purchased_from AS PurchasedFrom, purchased_on AS PurchasedOn, " +
+                "d.invoice_number AS InvoiceNumber, d.sold_to AS SoldTo, d.sold_on AS SoldOn, d.update_remarks AS UpdateRemarks, d.repair_remarks AS RepairRemarks " +
+                "FROM devices d " +
+                "JOIN models m ON m.id = d.model_id " +
+                "JOIN brands b ON b.id = m.brand_id " +
+                "WHERE model_id = (SELECT d2.model_id FROM devices d2 WHERE UPPER(d2.serial_number) LIKE @serial LIMIT 1) " +
+                "ORDER BY d.purchased_on DESC";
+
+            try
+            {
+                this.GetDbConnection();
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = getDevicesCommand;
+                cmd.Parameters.AddWithValue("@serial", serial);
+
+                this.conn.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    results.Columns.AddRange(new DataColumn[15] {
+                            new DataColumn("No."),
+                            new DataColumn("ID"),
+                            new DataColumn("BrandId"),
+                            new DataColumn("Brand"),
+                            new DataColumn("ModelId"),
+                            new DataColumn("ModelName"),
+                            new DataColumn("S/N"),
+                            new DataColumn("Type"),
+                            new DataColumn("Purchased from"),
+                            new DataColumn("PurchasedOn"),
+                            new DataColumn("Invoice number"),
+                            new DataColumn("Sold to"),
+                            new DataColumn("SoldOn"),
+                            new DataColumn("UpdateRemarks"),
+                            new DataColumn("RepairRemarks")
+                    });
+
+                    //Set AutoIncrement True for the First Column.
+                    results.Columns["No."].AutoIncrement = true;
+
+                    //Set the Starting or Seed value.
+                    results.Columns["No."].AutoIncrementSeed = 1;
+
+                    //Set the Increment value.
+                    results.Columns["No."].AutoIncrementStep = 1;
+                    while (dr.Read())
+                    {
+                        results.Rows.Add(null,
+                            !Convert.IsDBNull(dr["ID"]) ? dr["ID"] : "",
+                            !Convert.IsDBNull(dr["BrandId"]) ? dr["BrandId"] : "",
+                            !Convert.IsDBNull(dr["Brand"]) ? dr["Brand"] : "",
+                            !Convert.IsDBNull(dr["ModelId"]) ? dr["ModelId"] : "",
+                            !Convert.IsDBNull(dr["Model"]) ? dr["Model"] : "",
+                            !Convert.IsDBNull(dr["SN"]) ? dr["SN"] : "",
+                            !Convert.IsDBNull(dr["Type"]) ? dr["Type"] : "",
+                            !Convert.IsDBNull(dr["PurchasedFrom"]) ? dr["PurchasedFrom"] : "",
+                            !Convert.IsDBNull(dr["PurchasedOn"]) ? Convert.ToDateTime(dr["PurchasedOn"]).ToString("dd/MM/yyyy") : "",
+                            !Convert.IsDBNull(dr["InvoiceNumber"]) ? dr["InvoiceNumber"] : "",
+                            !Convert.IsDBNull(dr["SoldTo"]) ? dr["SoldTo"] : "",
+                            !Convert.IsDBNull(dr["SoldOn"]) ? Convert.ToDateTime(dr["SoldOn"]).ToString("dd/MM/yyyy") : "",
+                            !Convert.IsDBNull(dr["UpdateRemarks"]) ? dr["UpdateRemarks"] : "",
+                            !Convert.IsDBNull(dr["RepairRemarks"]) ? dr["RepairRemarks"] : "");
+                    }
+                }
+
+                this.conn.Close();
+
+                return results;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetDevicesForSoldOut : " + ex.Message + ", stack: " + ex.StackTrace);
+                return results;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public string UpdateDevice(int id, string serialNumber, int modelId, string type, string purchasedOn, string purchasedFrom, string soldOn, string soldTo, string invoiceNumber, string updateRemarks, string repairRemarks)
         {
             try
             {
+
+                //get soldTo id first
+                int? soldToId = this.GetSoldToId(soldTo);
+
                 this.GetDbConnection();
 
                 string addDeviceCommand = 
                     "UPDATE devices SET " +
                         "serial_number = @serialNumber, model_id = @modelId, type = @type, purchased_on = @purchasedOn, " +
-                        "purchased_from = @purchasedFrom, sold_on = @soldOn, sold_to = @soldTo, invoice_number = @invoiceNumber " +
+                        "purchased_from = @purchasedFrom, sold_on = @soldOn, buyer_id = @soldToId, invoice_number = @invoiceNumber, " +
+                        "repair_remarks = @repairRemarks, update_remarks = @updateRemarks " +
                         "WHERE id = @id";
 
                 MySqlCommand cmd = this.conn.CreateCommand();
@@ -259,8 +438,10 @@ namespace LaptopInformationSystem.Helpers
                 cmd.Parameters.AddWithValue("@purchasedOn", purchasedOn);
                 cmd.Parameters.AddWithValue("@purchasedFrom", purchasedFrom);
                 cmd.Parameters.AddWithValue("@soldOn", soldOn);
-                cmd.Parameters.AddWithValue("@soldTo", soldTo);
+                cmd.Parameters.AddWithValue("@soldToId", soldToId);
                 cmd.Parameters.AddWithValue("@invoiceNumber", invoiceNumber);
+                cmd.Parameters.AddWithValue("@updateRemarks", updateRemarks);
+                cmd.Parameters.AddWithValue("@repairRemarks", repairRemarks);
                 cmd.Parameters.AddWithValue("@id", id);
 
                 Console.WriteLine("Updating Device with id : " + id);
@@ -290,6 +471,98 @@ namespace LaptopInformationSystem.Helpers
             }
 
         }
+
+        public int? GetSoldToId(string soldTo)
+        {
+            int? soldToId = null;
+
+            try
+            {
+                this.GetDbConnection();
+                MySqlCommand cmd = this.conn.CreateCommand();
+                
+                cmd.CommandText = "SELECT b.id FROM buyers b WHERE TRIM(LOWER(b.name)) = @soldTo LIMIT 1;";
+                cmd.Parameters.AddWithValue("@soldTo", soldTo);
+
+                this.conn.Open();
+                soldToId = Convert.ToInt32(cmd.ExecuteScalar());
+                this.conn.Close();
+
+                //inserting new buyer
+                if(soldToId == null || soldToId == 0)
+                {
+                    this.GetDbConnection();
+                    MySqlCommand cmd2 = this.conn.CreateCommand();
+                    cmd2.CommandText = "INSERT INTO buyers (name) VALUES (@soldTo); SELECT LAST_INSERT_ID();";
+                    cmd2.Parameters.AddWithValue("@soldTo", soldTo);
+
+                    this.conn.Open();
+                    soldToId = Convert.ToInt32(cmd2.ExecuteScalar());
+                    this.conn.Close();
+                }
+
+                return soldToId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetSoldToId : " + ex.Message + ", stack: " + ex.StackTrace);
+                return soldToId;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public string UpdateDeviceRemarks(int id, string updateRemarks, string repairRemarks)
+        {
+            try
+            {
+                this.GetDbConnection();
+
+                string updateDeviceCommand =
+                    "UPDATE devices SET " +
+                        "repair_remarks = @repairRemarks, update_remarks = @updateRemarks " +
+                        "WHERE id = @id";
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = updateDeviceCommand;
+                cmd.Parameters.AddWithValue("@updateRemarks", updateRemarks);
+                cmd.Parameters.AddWithValue("@repairRemarks", repairRemarks);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                Console.WriteLine("Updating Device with id : " + id);
+                this.conn.Open();
+                cmd.ExecuteReader();
+                this.conn.Close();
+                Console.WriteLine("Device with id updated : " + id);
+                return ("Device Updated!!!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Duplicate"))
+                {
+                    Console.WriteLine(ex.Message);
+                    return ("Duplicate code!!!");
+                }
+
+                Console.WriteLine("Error on UpdateDeviceRemarks : " + ex.Message + ", stack: " + ex.StackTrace);
+                return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+
+        }
+
+
 
         public string DeleteDevice(string serialNumber)
         {
@@ -356,6 +629,37 @@ namespace LaptopInformationSystem.Helpers
             catch (Exception ex)
             {
                 Console.WriteLine("Error on UpdateAccessedDate : " + ex.Message + ", stack: " + ex.StackTrace);
+                return total;
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        public string GetTotalDevicesForSoldOut(string serial)
+        {
+            string total = "0";
+            try
+            {
+                this.GetDbConnection();
+                MySqlCommand cmd = this.conn.CreateCommand();
+                string serialCommand = " AND d.model_id = (SELECT d2.model_id FROM devices d2 WHERE UPPER(d2.serial_number) LIKE @serial LIMIT 1)";
+
+                cmd.CommandText = "SELECT COUNT(1) FROM devices d JOIN models m ON m.id = d.model_id JOIN brands b ON b.id = m.brand_id WHERE 1=1" + serialCommand;
+                cmd.Parameters.AddWithValue("@serial", serial);
+
+                this.conn.Open();
+                total = Convert.ToString(cmd.ExecuteScalar());
+                this.conn.Close();
+                return total;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetTotalDevicesForSoldOut : " + ex.Message + ", stack: " + ex.StackTrace);
                 return total;
             }
             finally
@@ -597,6 +901,52 @@ namespace LaptopInformationSystem.Helpers
 
                 Console.WriteLine("Error on AddModel : " + ex.Message + ", stack: " + ex.StackTrace);
                 return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+        }
+
+        //Buyers
+        public DataTable GetBuyers()
+        {
+            DataTable results = new DataTable();
+            string getBrandsCommand = "SELECT id AS ID, name AS Buyer FROM buyers ORDER BY name";
+
+            try
+            {
+                this.GetDbConnection();
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = getBrandsCommand;
+
+                this.conn.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    results.Columns.AddRange(new DataColumn[2] {
+                        new DataColumn("ID"),
+                        new DataColumn("Buyer")
+                    });
+
+                    while (dr.Read())
+                    {
+                        results.Rows.Add(dr["ID"], dr["Buyer"]);
+                    }
+                }
+
+                this.conn.Close();
+
+                return results;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on GetBuyers : " + ex.Message + ", stack: " + ex.StackTrace);
+                return results;
             }
             finally
             {

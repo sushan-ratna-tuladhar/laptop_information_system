@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,7 +15,9 @@ namespace LaptopInformationSystem
         private DataTable brands;
         private DataTable models;
         private DataTable report;
+        private DataTable buyers;
         public DateTimePicker newDateTime;
+        private DeviceRemarksForm deviceRemarksForm;
 
         public MainForm()
         {
@@ -35,12 +38,11 @@ namespace LaptopInformationSystem
                     {
                         if(this.btnShowDevice.Enabled == false)
                         {
-                            Cursor.Current = Cursors.WaitCursor;
-
                             this.btnShowDevice.Enabled = true;
                             this.btnAddDevice.Enabled = true;
                             this.btnAddBrand.Enabled = true;
                             this.btnAddModel.Enabled = true;
+                            this.btnSoldOut.Enabled = true;
                             if (dataGridCommon.ReadOnly == false)
                             {
                                 dataGridCommon.ReadOnly = true;
@@ -74,6 +76,7 @@ namespace LaptopInformationSystem
             this.btnAddBrand.Enabled = false;
             this.btnAddModel.Enabled = false;
             this.btnReport.Enabled = false;
+            this.btnSoldOut.Enabled = false;
             this.lblLoading.Show();
 
             Initialize.Start();
@@ -82,7 +85,6 @@ namespace LaptopInformationSystem
 
         private void btnShowDevice_Click(object sender, EventArgs e)
         {
-            grpShowDevices.Hide();
             dataGridCommon.Show();
             txtAddBrandName.Hide();
             lblAddBrandModelName.Hide();
@@ -92,7 +94,31 @@ namespace LaptopInformationSystem
             dataGridCommon.Hide();
             
             grpAddComponents.Hide();
+            btnSoldOutSave.Hide();
             grpShowDevices.Show();
+
+            lblBrand.Show();
+            dropdownGetDevicesBrand.Show();
+            lblModel.Show();
+            dropdownGetDevicesModel.Show();
+            btnGetDevices.Show();
+            lblPageSize.Show();
+            dropdownPageSize.Show();
+            lblSearch.Show();
+            txtCodeSearch.Show();
+            lblPageSize.Show();
+            dropdownPageSize.Show();
+            btnNextPage.Show();
+            btnPreviousPage.Show();
+            lblPageNo.Show();
+            txtPageNo.Show();
+
+            btnSoldOutSave.Hide();
+            lblSoldTo.Hide();
+            dropDownSoldTo.Hide();
+            lblSoldOn.Hide();
+            dateTimePickerSoldOn.Hide();
+
             btnShowDevice.Enabled = false;
 
             if (btnAddModel.Enabled == false)
@@ -110,6 +136,10 @@ namespace LaptopInformationSystem
             if (btnReport.Enabled == false)
             {
                 btnReport.Enabled = true;
+            }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
             }
 
             try
@@ -169,6 +199,10 @@ namespace LaptopInformationSystem
             {
                 dataGridCommon.ReadOnly = true;
             }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
+            }
 
             this.btnSave.Show();
             this.btnCancel.Show();
@@ -208,7 +242,7 @@ namespace LaptopInformationSystem
             CalendarColumn soldOn = new CalendarColumn();
             {
                 soldOn.Name = "Sold on";
-                soldOn.ValueType = typeof(DateTime);
+                soldOn.ValueType = typeof(string);
                 dataGridCommon.Columns.Add(soldOn);
             }
 
@@ -333,9 +367,10 @@ namespace LaptopInformationSystem
         {
             try
             {
+                string search = this.txtCodeSearch.Text.Trim();
+
                 int pageNumber = 1;
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
-                string search = this.txtCodeSearch.Text.Trim();
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
                 this.showData(pageNumber, pageSize, search, modelId, "");
@@ -401,28 +436,45 @@ namespace LaptopInformationSystem
 
         private void dataGridDevices_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
         {
-            int id = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ID"].Value);
-            int modelId = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ModelId"].Value);
-            string serialNo = dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value.ToString() : "";
-            string type = dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value.ToString() : "";
-            string purchasedFrom = dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value.ToString() : "";
-            string purchasedOn = dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value.ToString() : null;
-            if (purchasedOn != null)
-            {
-                purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
-            }
-            string invoiceNumber = dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value.ToString() : "";
-            string soldTo = dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value.ToString() : "";
-            string soldOn = dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value.ToString() : null;
-            if (soldOn != null)
-            {
-                soldOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
-            }
-
             // when save button is clicked
             if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnSave")
             {
-                string result = this.db.UpdateDevice(id, serialNo, modelId, type, purchasedOn, purchasedFrom, soldOn, soldTo, invoiceNumber);
+                int id = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ID"].Value);
+                int modelId = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ModelId"].Value);
+                string serialNo = dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value.ToString() : "";
+                string type = dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Type"].Value.ToString() : "";
+                string purchasedFrom = dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased from"].Value.ToString() : "";
+                string purchasedOn = dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Purchased on"].Value.ToString() : null;
+                if (purchasedOn != null)
+                {
+                    try
+                    {
+                        purchasedOn = DateTime.Parse(purchasedOn).ToString("yyyy-MM-dd");
+                    }
+                    catch
+                    {
+                        purchasedOn = null;
+                    }
+                }
+                string invoiceNumber = dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Invoice number"].Value.ToString() : "";
+                string soldTo = dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold to"].Value.ToString() : "";
+                string soldOn = dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["Sold on"].Value.ToString() : null;
+                if (soldOn != null)
+                {
+                    try
+                    {
+                        soldOn = DateTime.Parse(soldOn).ToString("yyyy-MM-dd");
+                    }
+                    catch
+                    {
+                        soldOn = null;
+                    }
+                }
+                string updateRemarks = dataGridDevices.Rows[e.RowIndex].Cells["UpdateRemarks"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["UpdateRemarks"].Value.ToString() : null;
+                string repairRemarks = dataGridDevices.Rows[e.RowIndex].Cells["RepairRemarks"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["RepairRemarks"].Value.ToString() : null;
+
+
+                string result = this.db.UpdateDevice(id, serialNo, modelId, type, purchasedOn, purchasedFrom, soldOn, soldTo, invoiceNumber, updateRemarks, repairRemarks);
 
                 DialogResult dialogResult = MessageBox.Show(result, "Update", MessageBoxButtons.OK);
             }
@@ -430,6 +482,8 @@ namespace LaptopInformationSystem
             //when delete button is clicked
             if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnDelete")
             {
+                string serialNo = dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value != null ? dataGridDevices.Rows[e.RowIndex].Cells["S/N"].Value.ToString() : "";
+
                 DialogResult dialogResult = MessageBox.Show("Delete device " + serialNo + "?", "Delete", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
@@ -446,11 +500,42 @@ namespace LaptopInformationSystem
                 {
                 }
             }
+
+            //when remarks button is clicked
+            if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnRemarks")
+            {
+                // display on the new form.
+                int id = Convert.ToInt32(dataGridDevices.Rows[e.RowIndex].Cells["ID"].Value);
+                string updateRemarks = Convert.ToString(dataGridDevices.Rows[e.RowIndex].Cells["UpdateRemarks"].Value);
+                string repairRemarks = Convert.ToString(dataGridDevices.Rows[e.RowIndex].Cells["RepairRemarks"].Value);
+
+                this.deviceRemarksForm = new DeviceRemarksForm(updateRemarks, repairRemarks);
+                EventArgs args = new EventArgs();
+
+                deviceRemarksForm.onBtnSaveClick += (_sender, _e) => remarks_onBtnSaveClick(sender, e, id);
+
+                deviceRemarksForm.ShowDialog();
+            }
+
+            //for soldout
+            if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnAddDeviceNew")
+            {
+                int count = this.dataGridDevices.Rows.Count - 1;
+                this.dataGridDevices.Rows.Add("");
+            }
+
+            //for soldout
+            if (this.dataGridDevices.Columns[e.ColumnIndex].Name == "btnRemoveDeviceNew")
+            {
+                if (dataGridDevices.Rows.Count > 1)
+                {
+                    this.dataGridDevices.Rows.RemoveAt(dataGridDevices.CurrentRow.Index);
+                }
+            }
         }
 
         private void dataGridAddDevices_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            //when delete button is clickedf
             if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnAddDeviceNew")
             {
                 int count = this.dataGridCommon.Rows.Count - 1;
@@ -468,6 +553,7 @@ namespace LaptopInformationSystem
                 );
             }
 
+            //when delete button is clicked
             if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnRemoveDeviceNew")
             {
                 if(dataGridCommon.Rows.Count > 1)
@@ -475,6 +561,7 @@ namespace LaptopInformationSystem
                     this.dataGridCommon.Rows.RemoveAt(dataGridCommon.CurrentRow.Index);
                 }
             }
+
         }
 
         private void txtCodeSearch_TextChanged(object sender, EventArgs e)
@@ -564,6 +651,10 @@ namespace LaptopInformationSystem
             {
                 btnReport.Enabled = true;
             }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
+            }
         }
 
         private void btnAddModel_Click(object sender, EventArgs e)
@@ -603,6 +694,10 @@ namespace LaptopInformationSystem
             if (btnAddBrand.Enabled == false)
             {
                 btnAddBrand.Enabled = true;
+            }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
             }
         }
 
@@ -651,7 +746,14 @@ namespace LaptopInformationSystem
                     {
                         if(cell.ValueType == typeof(DateTime))
                         {
-                            newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "01/01/1999";
+                            try
+                            {
+                                newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "";
+                            }
+                            catch
+                            {
+                                newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = "";
+                            }
                         } else
                         {
                             newDevices.Rows[newDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "";
@@ -745,21 +847,6 @@ namespace LaptopInformationSystem
             this.dataGridDevices.Columns["No."].ReadOnly = true;
             this.dataGridDevices.Columns["Brand"].ReadOnly = true;
 
-            //DataGridViewComboBoxColumn brandsComboBox = new DataGridViewComboBoxColumn();
-            //{
-            //    brandsComboBox.DataSource = this.brands;
-            //    brandsComboBox.Name = "Brand";
-            //    brandsComboBox.DisplayMember = "Brand";
-            //    brandsComboBox.ValueMember = "ID";
-            //    this.dataGridDevices.Columns["BrandName"].Visible = false;
-            //    this.dataGridDevices.Columns.Insert(2, brandsComboBox);
-
-            //    foreach (DataGridViewRow row in this.dataGridDevices.Rows)
-            //    {
-            //        row.Cells["Brand"].Value = row.Cells["BrandId"].Value;
-            //    }
-            //}
-
             DataGridViewComboBoxColumn modelsComboBox = new DataGridViewComboBoxColumn();
             {
                 modelsComboBox.DataSource = this.models;
@@ -814,25 +901,39 @@ namespace LaptopInformationSystem
 
             DataGridViewButtonColumn button = new DataGridViewButtonColumn();
             {
-                button.Name = "btnSave";
+                button.Name = "btnRemarks";
                 button.HeaderText = "";
-                button.Text = "Save";
+                button.Text = "Remarks";
                 button.UseColumnTextForButtonValue = true;
                 this.dataGridDevices.Columns.Add(button);
             }
 
             DataGridViewButtonColumn button2 = new DataGridViewButtonColumn();
             {
-                button2.Name = "btnDelete";
+                button2.Name = "btnSave";
                 button2.HeaderText = "";
-                button2.Text = "Delete";
+                button2.Text = "Save";
                 button2.UseColumnTextForButtonValue = true;
                 this.dataGridDevices.Columns.Add(button2);
+            }
+
+            DataGridViewButtonColumn button3 = new DataGridViewButtonColumn();
+            {
+                button3.Name = "btnDelete";
+                button3.HeaderText = "";
+                button3.Text = "Delete";
+                button3.UseColumnTextForButtonValue = true;
+                this.dataGridDevices.Columns.Add(button3);
             }
 
             this.dataGridDevices.Columns["ID"].Visible = false;
             this.dataGridDevices.Columns["BrandId"].Visible = false;
             this.dataGridDevices.Columns["ModelId"].Visible = false;
+            this.dataGridDevices.Columns["BuyerId"].Visible = false;
+            this.dataGridDevices.Columns["UpdateRemarks"].HeaderText = "Update remarks";
+            this.dataGridDevices.Columns["RepairRemarks"].HeaderText = "Repair remarks";
+            this.dataGridDevices.Columns["UpdateRemarks"].Visible = false;
+            this.dataGridDevices.Columns["RepairRemarks"].Visible = false;
 
             this.lblTotalValue.Text = Convert.ToString(total);
             this.dataGridDevices.Show();
@@ -849,6 +950,7 @@ namespace LaptopInformationSystem
             this.brands = this.db.GetBrands();
             this.models = this.db.GetModels(0);
             this.report = this.db.GetReport();
+            this.buyers = this.db.GetBuyers();
         }
 
         private void btnReport_Click(object sender, EventArgs e)
@@ -872,6 +974,10 @@ namespace LaptopInformationSystem
             if (btnAddDevice.Enabled == false)
             {
                 btnAddDevice.Enabled = true;
+            }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
             }
 
             if (dataGridCommon.ReadOnly == false)
@@ -904,6 +1010,192 @@ namespace LaptopInformationSystem
             {
                 dataGridCommon.Show();
             }
+        }
+
+        private void btnSoldOut_Click(object sender, EventArgs e)
+        {
+            txtAddBrandName.Hide();
+            lblAddBrandModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            txtAddModelName.Hide();
+            dataGridCommon.Hide();
+
+            grpAddComponents.Hide();
+            grpShowDevices.Show();
+            btnSoldOut.Enabled = false;
+
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
+            }
+            if (btnReport.Enabled == false)
+            {
+                btnReport.Enabled = true;
+            }
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+
+            btnSoldOutSave.Enabled = true;
+
+            this.dataGridDevices.Columns.Clear();
+            this.dataGridDevices.DataSource = null;
+
+            lblBrand.Hide();
+            dropdownGetDevicesBrand.Hide();
+            lblModel.Hide();
+            dropdownGetDevicesModel.Hide();
+            btnGetDevices.Hide();
+            lblPageSize.Hide();
+            dropdownPageSize.Hide();
+            lblSearch.Hide();
+            txtCodeSearch.Hide();
+            lblPageSize.Hide();
+            dropdownPageSize.Hide();
+            btnNextPage.Hide();
+            btnPreviousPage.Hide();
+            lblPageNo.Hide();
+            txtPageNo.Hide();
+
+            btnSoldOutSave.Show();
+            lblSoldTo.Show();
+            dropDownSoldTo.Show();
+            lblSoldOn.Show();
+            dateTimePickerSoldOn.Show();
+
+            this.dataGridDevices.Columns.Add("SN", "S/N");
+            this.dataGridDevices.Columns["SN"].ValueType = typeof(string);
+            
+            dropDownSoldTo.DisplayMember = "Buyer";
+            dropDownSoldTo.ValueMember = "ID";
+            dropDownSoldTo.DataSource = this.buyers;
+            dropDownSoldTo.SelectedItem = null;
+
+            DataGridViewButtonColumn newDevice = new DataGridViewButtonColumn();
+            {
+                newDevice.Name = "btnAddDeviceNew";
+                newDevice.HeaderText = "Add";
+                newDevice.Text = "+";
+                newDevice.UseColumnTextForButtonValue = true;
+                newDevice.DefaultCellStyle.NullValue = "+";
+                newDevice.ValueType = typeof(string);
+                this.dataGridDevices.Columns.Add(newDevice);
+            }
+
+            DataGridViewButtonColumn removeDevice = new DataGridViewButtonColumn();
+            {
+                removeDevice.Name = "btnRemoveDeviceNew";
+                removeDevice.HeaderText = "Remove";
+                removeDevice.Text = "-";
+                removeDevice.UseColumnTextForButtonValue = true;
+                removeDevice.DefaultCellStyle.NullValue = "-";
+                removeDevice.ValueType = typeof(string);
+                this.dataGridDevices.Columns.Add(removeDevice);
+            }
+
+            this.dataGridDevices.Columns["SN"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridDevices.Columns["btnAddDeviceNew"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridDevices.Columns["btnRemoveDeviceNew"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridDevices.Rows.Add();
+
+        }
+
+        private void btnSoldOutSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string soldTo = dropDownSoldTo.Text;
+                string soldOn = dateTimePickerSoldOn.Value.ToString();
+
+                DataTable soldDevices = new DataTable();
+                //Adding the Columns.
+                foreach (DataGridViewColumn column in dataGridDevices.Columns)
+                {
+                    soldDevices.Columns.Add(column.HeaderText, column.ValueType);
+                }
+
+                //Adding the Rows.
+                foreach (DataGridViewRow row in dataGridDevices.Rows)
+                {
+                    soldDevices.Rows.Add();
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        if (cell.ValueType == typeof(DateTime))
+                        {
+                            try
+                            {
+                                soldDevices.Rows[soldDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "";
+                            }
+                            catch
+                            {
+                                soldDevices.Rows[soldDevices.Rows.Count - 1][cell.ColumnIndex] = "";
+                            }
+                        }
+                        else
+                        {
+                            soldDevices.Rows[soldDevices.Rows.Count - 1][cell.ColumnIndex] = cell.Value != null ? cell.Value.ToString() : "";
+                        }
+                    }
+                }
+
+                DataRow[] filteredDevices = soldDevices.Select("[S/N] <> ''");
+                DataTable filteredDevicesTable = filteredDevices.CopyToDataTable();
+
+                string result = this.db.UpdateSoldDevices(filteredDevicesTable, soldTo, soldOn);
+
+                MessageBox.Show(result, "Devices Sold", MessageBoxButtons.OK);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on UpdateSoldDevices: " + ex.Message + ", stack: " + ex.StackTrace);
+                MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
+            }
+        }
+
+        void remarks_onBtnSaveClick(object sender, EventArgs e, int id)
+        {
+            try
+            {
+                string repairRemarks = deviceRemarksForm.txtRepairRemarksEdit.Text.Trim();
+                string updateRemarks = deviceRemarksForm.txtUpdateRemarksEdit.Text.Trim();
+
+                string result = this.db.UpdateDeviceRemarks(id, updateRemarks, repairRemarks);
+                DialogResult dialogResultUpdated = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
+
+                if (dialogResultUpdated == DialogResult.OK)
+                    if (dialogResultUpdated == DialogResult.OK)
+                    {
+                        this.deviceRemarksForm.Close();
+                        int pageNo = 1;
+                        int.TryParse(this.txtPageNo.Text, out pageNo);
+                        int pageSize = 20;
+                        int.TryParse(this.dropdownPageSize.Text, out pageSize);
+                        int modelId = 0;
+                        int.TryParse(this.dropdownGetDevicesModel.ValueMember, out modelId);
+
+                        this.showData(pageNo, pageSize, this.txtCodeSearch.Text, modelId, "");
+                    }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on EditDeviceRemarks: " + ex.Message + ", stack: " + ex.StackTrace);
+                MessageBox.Show("Something went wrong", "Notice", MessageBoxButtons.OK);
+            }
+        }
+
+        private void dateTimePickerSoldOn_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
