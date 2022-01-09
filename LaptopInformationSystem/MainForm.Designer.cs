@@ -40,6 +40,9 @@
             this.lblActivivies = new System.Windows.Forms.Label();
             this.grpShowDevices = new System.Windows.Forms.GroupBox();
             this.dateTimePickerSoldOn = new System.Windows.Forms.DateTimePicker();
+            this.dropDownSoldTo = new System.Windows.Forms.ComboBox();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.lblSoldOn = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.btnSoldOutSave = new System.Windows.Forms.Button();
@@ -75,9 +78,6 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.txtAddModelName = new System.Windows.Forms.TextBox();
             this.dataGridCommon = new System.Windows.Forms.DataGridView();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.dropDownSoldTo = new System.Windows.Forms.ComboBox();
             this.grpLaptopInformationSystem.SuspendLayout();
             this.grpShowDevices.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridDevices)).BeginInit();
@@ -242,9 +242,45 @@
             // 
             this.dateTimePickerSoldOn.Location = new System.Drawing.Point(621, 30);
             this.dateTimePickerSoldOn.Name = "dateTimePickerSoldOn";
-            this.dateTimePickerSoldOn.Size = new System.Drawing.Size(229, 22);
+            this.dateTimePickerSoldOn.Size = new System.Drawing.Size(269, 22);
             this.dateTimePickerSoldOn.TabIndex = 27;
             this.dateTimePickerSoldOn.ValueChanged += new System.EventHandler(this.dateTimePickerSoldOn_ValueChanged);
+            // 
+            // dropDownSoldTo
+            // 
+            this.dropDownSoldTo.FormattingEnabled = true;
+            this.dropDownSoldTo.Location = new System.Drawing.Point(388, 30);
+            this.dropDownSoldTo.Name = "dropDownSoldTo";
+            this.dropDownSoldTo.Size = new System.Drawing.Size(164, 24);
+            this.dropDownSoldTo.TabIndex = 30;
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "10",
+            "20",
+            "50",
+            "100"});
+            this.comboBox2.Location = new System.Drawing.Point(582, 1165);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(53, 24);
+            this.comboBox2.TabIndex = 29;
+            this.comboBox2.Text = "20";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "10",
+            "20",
+            "50",
+            "100"});
+            this.comboBox1.Location = new System.Drawing.Point(574, 1157);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(53, 24);
+            this.comboBox1.TabIndex = 28;
+            this.comboBox1.Text = "20";
             // 
             // lblSoldOn
             // 
@@ -598,42 +634,6 @@
             this.dataGridCommon.TabIndex = 15;
             this.dataGridCommon.Visible = false;
             this.dataGridCommon.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridAddDevices_CellContentClick);
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "10",
-            "20",
-            "50",
-            "100"});
-            this.comboBox1.Location = new System.Drawing.Point(574, 1157);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(53, 24);
-            this.comboBox1.TabIndex = 28;
-            this.comboBox1.Text = "20";
-            // 
-            // comboBox2
-            // 
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Items.AddRange(new object[] {
-            "10",
-            "20",
-            "50",
-            "100"});
-            this.comboBox2.Location = new System.Drawing.Point(582, 1165);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(53, 24);
-            this.comboBox2.TabIndex = 29;
-            this.comboBox2.Text = "20";
-            // 
-            // dropDownSoldTo
-            // 
-            this.dropDownSoldTo.FormattingEnabled = true;
-            this.dropDownSoldTo.Location = new System.Drawing.Point(388, 30);
-            this.dropDownSoldTo.Name = "dropDownSoldTo";
-            this.dropDownSoldTo.Size = new System.Drawing.Size(164, 24);
-            this.dropDownSoldTo.TabIndex = 30;
             // 
             // MainForm
             // 

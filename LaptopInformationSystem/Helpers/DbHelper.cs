@@ -198,8 +198,8 @@ namespace LaptopInformationSystem.Helpers
             string finalCommand = "";
             string searchCommand = "";
             string getDevicesCommand = 
-                "SELECT d.id AS ID, b.id AS BrandId, b.name AS Brand, m.id AS ModelId, m.name AS Model, d.serial_number AS SN, d.type AS Type, d.purchased_from AS PurchasedFrom, purchased_on AS PurchasedOn, " +
-                "d.invoice_number AS InvoiceNumber, buy.id AS BuyerId, buy.name AS SoldTo, d.sold_on AS SoldOn, d.update_remarks AS UpdateRemarks, d.repair_remarks AS RepairRemarks " + 
+                "SELECT d.id AS ID, b.id AS BrandId, COALESCE(b.name,'') AS Brand, m.id AS ModelId, COALESCE(m.name,'') AS Model, COALESCE(d.serial_number,'') AS SN, COALESCE(d.type,'') AS Type, COALESCE(d.purchased_from,'') AS PurchasedFrom, purchased_on AS PurchasedOn, " +
+                "COALESCE(d.invoice_number,'') AS InvoiceNumber, buy.id AS BuyerId, COALESCE(buy.name,'') AS SoldTo, d.sold_on AS SoldOn, COALESCE(d.update_remarks,'') AS UpdateRemarks, COALESCE(d.repair_remarks,'') AS RepairRemarks " + 
                 "FROM devices d " + 
                 "JOIN models m ON m.id = d.model_id " + 
                 "JOIN brands b ON b.id = m.brand_id " +
@@ -678,8 +678,8 @@ namespace LaptopInformationSystem.Helpers
                 "SELECT b.name AS Brand, m.name AS Model, COUNT(d.id) AS DeviceCount " +
                 "FROM brands b " +
                 "JOIN models m ON m.brand_id = b.id " +
-                "LEFT JOIN devices d ON d.model_id = m.id " +
-                "WHERE COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' OR COALESCE(d.invoice_number,'') = '' AND COALESCE(m.name,'') <> '' " +
+                "LEFT JOIN devices d ON d.model_id = m.id AND COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' AND d.buyer_id <> 0 " +
+                "WHERE COALESCE(m.name,'') <> '' " +
                 "GROUP BY b.name, m.name " +
                 "ORDER BY b.name, m.name";
 

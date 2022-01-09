@@ -137,9 +137,16 @@ class CalendarEditingControl : DateTimePicker, IDataGridViewEditingControl
     public void ApplyCellStyleToEditingControl(
         DataGridViewCellStyle dataGridViewCellStyle)
     {
-        this.Font = dataGridViewCellStyle.Font;
-        this.CalendarForeColor = dataGridViewCellStyle.ForeColor;
-        this.CalendarMonthBackground = dataGridViewCellStyle.BackColor;
+        try
+        {
+            this.Font = dataGridViewCellStyle.Font;
+            this.CalendarForeColor = dataGridViewCellStyle.ForeColor;
+            this.CalendarMonthBackground = dataGridViewCellStyle.BackColor;
+        }
+        catch
+        { 
+        }
+        
     }
 
     // Implements the IDataGridViewEditingControl.EditingControlRowIndex
