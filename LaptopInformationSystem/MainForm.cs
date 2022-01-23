@@ -57,10 +57,11 @@ namespace LaptopInformationSystem
                             {
                                 dataGridCommon.Show();
                             }
-                            this.dataGridCommon.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-                            this.dataGridCommon.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                            this.dataGridCommon.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                            this.dataGridCommon.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                            this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                            this.dataGridCommon.Columns["Device count"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+
 
                             this.btnSave.Hide();
                             this.btnCancel.Hide();
@@ -268,7 +269,7 @@ namespace LaptopInformationSystem
                 this.dataGridCommon.Columns.Add(removeDevice);
             }
 
-            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
             this.dataGridCommon.Columns["SN"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
             this.dataGridCommon.Columns["Type"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
             this.dataGridCommon.Columns["PurchasedFrom"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -711,11 +712,11 @@ namespace LaptopInformationSystem
 
                 MessageBox.Show(result, "Model Added", MessageBoxButtons.OK);
 
-                Thread LoadBrands = new Thread(delegate () {
-                    this.brands = this.db.GetBrands();
+                Thread LoadModels = new Thread(delegate () {
+                    this.models = this.db.GetModels(0);
                 });
 
-                LoadBrands.Start();
+                LoadModels.Start();
 
             } else if(txtAddBrandName.Visible)
             {
@@ -724,11 +725,11 @@ namespace LaptopInformationSystem
 
                 MessageBox.Show(result, "Brand Added", MessageBoxButtons.OK);
 
-                Thread LoadModels = new Thread(delegate () {
-                    this.brands = this.db.GetModels(0);
+                Thread LoadBrands = new Thread(delegate () {
+                    this.brands = this.db.GetBrands();
                 });
 
-                LoadModels.Start();
+                LoadBrands.Start();
             } else if(dataGridCommon.Visible)
             {
                 DataTable newDevices = new DataTable();
@@ -1002,10 +1003,11 @@ namespace LaptopInformationSystem
             this.dataGridCommon.DataSource = this.report;
 
             this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             this.dataGridCommon.Columns["Device count"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
 
+            //this.dataGridCommon.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
             if (!dataGridCommon.Visible)
             {
                 dataGridCommon.Show();
@@ -1194,6 +1196,16 @@ namespace LaptopInformationSystem
         }
 
         private void dateTimePickerSoldOn_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void grpShowDevices_Enter(object sender, EventArgs e)
         {
 
         }

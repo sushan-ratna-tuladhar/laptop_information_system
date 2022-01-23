@@ -30,14 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.grpLaptopInformationSystem = new System.Windows.Forms.GroupBox();
-            this.btnSoldOut = new System.Windows.Forms.Button();
-            this.lblLoading = new System.Windows.Forms.Label();
-            this.btnReport = new System.Windows.Forms.Button();
-            this.btnAddModel = new System.Windows.Forms.Button();
-            this.btnAddBrand = new System.Windows.Forms.Button();
-            this.btnShowDevice = new System.Windows.Forms.Button();
-            this.btnAddDevice = new System.Windows.Forms.Button();
-            this.lblActivivies = new System.Windows.Forms.Label();
             this.grpShowDevices = new System.Windows.Forms.GroupBox();
             this.dateTimePickerSoldOn = new System.Windows.Forms.DateTimePicker();
             this.dropDownSoldTo = new System.Windows.Forms.ComboBox();
@@ -55,12 +47,6 @@
             this.dropdownGetDevicesBrand = new System.Windows.Forms.ComboBox();
             this.lblModel = new System.Windows.Forms.Label();
             this.lblBrand = new System.Windows.Forms.Label();
-            this.btnPreviousPage = new System.Windows.Forms.Button();
-            this.btnNextPage = new System.Windows.Forms.Button();
-            this.txtPageNo = new System.Windows.Forms.TextBox();
-            this.lblPageNo = new System.Windows.Forms.Label();
-            this.lblTotalValue = new System.Windows.Forms.Label();
-            this.lblTotal = new System.Windows.Forms.Label();
             this.btnCancelGetDevices = new System.Windows.Forms.Button();
             this.btnGetDevices = new System.Windows.Forms.Button();
             this.dropdownPageSize = new System.Windows.Forms.ComboBox();
@@ -78,128 +64,55 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.txtAddModelName = new System.Windows.Forms.TextBox();
             this.dataGridCommon = new System.Windows.Forms.DataGridView();
+            this.groupBoxActivities = new System.Windows.Forms.GroupBox();
+            this.btnAddDevice = new System.Windows.Forms.Button();
+            this.lblLoading = new System.Windows.Forms.Label();
+            this.btnSoldOut = new System.Windows.Forms.Button();
+            this.btnShowDevice = new System.Windows.Forms.Button();
+            this.btnAddBrand = new System.Windows.Forms.Button();
+            this.btnReport = new System.Windows.Forms.Button();
+            this.btnAddModel = new System.Windows.Forms.Button();
+            this.btnNextPage = new System.Windows.Forms.Button();
+            this.txtPageNo = new System.Windows.Forms.TextBox();
+            this.lblTotal = new System.Windows.Forms.Label();
+            this.lblPageNo = new System.Windows.Forms.Label();
+            this.lblTotalValue = new System.Windows.Forms.Label();
+            this.btnPreviousPage = new System.Windows.Forms.Button();
             this.grpLaptopInformationSystem.SuspendLayout();
             this.grpShowDevices.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridDevices)).BeginInit();
             this.grpAddComponents.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridCommon)).BeginInit();
+            this.groupBoxActivities.SuspendLayout();
             this.SuspendLayout();
             // 
             // grpLaptopInformationSystem
             // 
             this.grpLaptopInformationSystem.AutoSize = true;
             this.grpLaptopInformationSystem.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.grpLaptopInformationSystem.Controls.Add(this.btnSoldOut);
-            this.grpLaptopInformationSystem.Controls.Add(this.lblLoading);
-            this.grpLaptopInformationSystem.Controls.Add(this.btnReport);
-            this.grpLaptopInformationSystem.Controls.Add(this.btnAddModel);
-            this.grpLaptopInformationSystem.Controls.Add(this.btnAddBrand);
-            this.grpLaptopInformationSystem.Controls.Add(this.btnShowDevice);
-            this.grpLaptopInformationSystem.Controls.Add(this.btnAddDevice);
-            this.grpLaptopInformationSystem.Controls.Add(this.lblActivivies);
             this.grpLaptopInformationSystem.Controls.Add(this.grpShowDevices);
             this.grpLaptopInformationSystem.Controls.Add(this.grpAddComponents);
+            this.grpLaptopInformationSystem.Controls.Add(this.groupBoxActivities);
             this.grpLaptopInformationSystem.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpLaptopInformationSystem.Location = new System.Drawing.Point(0, 0);
             this.grpLaptopInformationSystem.Name = "grpLaptopInformationSystem";
-            this.grpLaptopInformationSystem.Size = new System.Drawing.Size(1320, 701);
+            this.grpLaptopInformationSystem.Size = new System.Drawing.Size(1424, 757);
             this.grpLaptopInformationSystem.TabIndex = 0;
             this.grpLaptopInformationSystem.TabStop = false;
             this.grpLaptopInformationSystem.Text = "Laptop information system";
             this.grpLaptopInformationSystem.Enter += new System.EventHandler(this.grpLaptopInformationSystem_Enter);
             // 
-            // btnSoldOut
-            // 
-            this.btnSoldOut.AutoSize = true;
-            this.btnSoldOut.Location = new System.Drawing.Point(1045, 69);
-            this.btnSoldOut.Name = "btnSoldOut";
-            this.btnSoldOut.Size = new System.Drawing.Size(195, 36);
-            this.btnSoldOut.TabIndex = 19;
-            this.btnSoldOut.Text = "Sold out";
-            this.btnSoldOut.UseVisualStyleBackColor = true;
-            this.btnSoldOut.Click += new System.EventHandler(this.btnSoldOut_Click);
-            // 
-            // lblLoading
-            // 
-            this.lblLoading.AutoSize = true;
-            this.lblLoading.Location = new System.Drawing.Point(541, 18);
-            this.lblLoading.Name = "lblLoading";
-            this.lblLoading.Size = new System.Drawing.Size(71, 17);
-            this.lblLoading.TabIndex = 18;
-            this.lblLoading.Text = "Loading...";
-            this.lblLoading.Visible = false;
-            // 
-            // btnReport
-            // 
-            this.btnReport.AutoSize = true;
-            this.btnReport.Location = new System.Drawing.Point(839, 69);
-            this.btnReport.Name = "btnReport";
-            this.btnReport.Size = new System.Drawing.Size(195, 36);
-            this.btnReport.TabIndex = 17;
-            this.btnReport.Text = "Stock report";
-            this.btnReport.UseVisualStyleBackColor = true;
-            this.btnReport.Click += new System.EventHandler(this.btnReport_Click);
-            // 
-            // btnAddModel
-            // 
-            this.btnAddModel.AutoSize = true;
-            this.btnAddModel.Location = new System.Drawing.Point(633, 69);
-            this.btnAddModel.Name = "btnAddModel";
-            this.btnAddModel.Size = new System.Drawing.Size(195, 36);
-            this.btnAddModel.TabIndex = 12;
-            this.btnAddModel.Text = "Add Model";
-            this.btnAddModel.UseVisualStyleBackColor = true;
-            this.btnAddModel.Click += new System.EventHandler(this.btnAddModel_Click);
-            // 
-            // btnAddBrand
-            // 
-            this.btnAddBrand.AutoSize = true;
-            this.btnAddBrand.Location = new System.Drawing.Point(427, 69);
-            this.btnAddBrand.Name = "btnAddBrand";
-            this.btnAddBrand.Size = new System.Drawing.Size(195, 36);
-            this.btnAddBrand.TabIndex = 11;
-            this.btnAddBrand.Text = "Add Brand";
-            this.btnAddBrand.UseVisualStyleBackColor = true;
-            this.btnAddBrand.Click += new System.EventHandler(this.btnAddBrand_Click);
-            // 
-            // btnShowDevice
-            // 
-            this.btnShowDevice.AutoSize = true;
-            this.btnShowDevice.Location = new System.Drawing.Point(221, 69);
-            this.btnShowDevice.Name = "btnShowDevice";
-            this.btnShowDevice.Size = new System.Drawing.Size(195, 36);
-            this.btnShowDevice.TabIndex = 4;
-            this.btnShowDevice.Text = "Show Device";
-            this.btnShowDevice.UseVisualStyleBackColor = true;
-            this.btnShowDevice.Click += new System.EventHandler(this.btnShowDevice_Click);
-            // 
-            // btnAddDevice
-            // 
-            this.btnAddDevice.AutoSize = true;
-            this.btnAddDevice.Location = new System.Drawing.Point(15, 69);
-            this.btnAddDevice.Name = "btnAddDevice";
-            this.btnAddDevice.Size = new System.Drawing.Size(195, 36);
-            this.btnAddDevice.TabIndex = 1;
-            this.btnAddDevice.Text = "Add Device";
-            this.btnAddDevice.UseVisualStyleBackColor = true;
-            this.btnAddDevice.Click += new System.EventHandler(this.btnAddDevice_Click);
-            // 
-            // lblActivivies
-            // 
-            this.lblActivivies.AutoSize = true;
-            this.lblActivivies.Location = new System.Drawing.Point(12, 44);
-            this.lblActivivies.Name = "lblActivivies";
-            this.lblActivivies.Size = new System.Drawing.Size(67, 17);
-            this.lblActivivies.TabIndex = 0;
-            this.lblActivivies.Text = "Activities:";
-            this.lblActivivies.Click += new System.EventHandler(this.lblActivities_Click);
-            // 
             // grpShowDevices
             // 
-            this.grpShowDevices.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.grpShowDevices.AutoSize = true;
+            this.grpShowDevices.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.grpShowDevices.Controls.Add(this.lblTotalValue);
+            this.grpShowDevices.Controls.Add(this.btnPreviousPage);
+            this.grpShowDevices.Controls.Add(this.lblTotal);
+            this.grpShowDevices.Controls.Add(this.lblPageNo);
+            this.grpShowDevices.Controls.Add(this.btnNextPage);
+            this.grpShowDevices.Controls.Add(this.txtPageNo);
+            this.grpShowDevices.Controls.Add(this.dataGridDevices);
             this.grpShowDevices.Controls.Add(this.dateTimePickerSoldOn);
             this.grpShowDevices.Controls.Add(this.dropDownSoldTo);
             this.grpShowDevices.Controls.Add(this.comboBox2);
@@ -216,27 +129,22 @@
             this.grpShowDevices.Controls.Add(this.dropdownGetDevicesBrand);
             this.grpShowDevices.Controls.Add(this.lblModel);
             this.grpShowDevices.Controls.Add(this.lblBrand);
-            this.grpShowDevices.Controls.Add(this.btnPreviousPage);
-            this.grpShowDevices.Controls.Add(this.btnNextPage);
-            this.grpShowDevices.Controls.Add(this.txtPageNo);
-            this.grpShowDevices.Controls.Add(this.lblPageNo);
-            this.grpShowDevices.Controls.Add(this.lblTotalValue);
-            this.grpShowDevices.Controls.Add(this.lblTotal);
             this.grpShowDevices.Controls.Add(this.btnCancelGetDevices);
             this.grpShowDevices.Controls.Add(this.btnGetDevices);
             this.grpShowDevices.Controls.Add(this.dropdownPageSize);
             this.grpShowDevices.Controls.Add(this.lblPageSize);
             this.grpShowDevices.Controls.Add(this.txtCodeSearch);
             this.grpShowDevices.Controls.Add(this.lblSearch);
-            this.grpShowDevices.Controls.Add(this.dataGridDevices);
             this.grpShowDevices.Controls.Add(this.lblSoldTo);
-            this.grpShowDevices.Location = new System.Drawing.Point(12, 141);
+            this.grpShowDevices.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grpShowDevices.Location = new System.Drawing.Point(3, 108);
             this.grpShowDevices.Name = "grpShowDevices";
-            this.grpShowDevices.Size = new System.Drawing.Size(1201, 2339);
+            this.grpShowDevices.Size = new System.Drawing.Size(1418, 646);
             this.grpShowDevices.TabIndex = 10;
             this.grpShowDevices.TabStop = false;
             this.grpShowDevices.Text = "Devices";
             this.grpShowDevices.Visible = false;
+            this.grpShowDevices.Enter += new System.EventHandler(this.grpShowDevices_Enter);
             // 
             // dateTimePickerSoldOn
             // 
@@ -386,66 +294,6 @@
             this.lblBrand.TabIndex = 17;
             this.lblBrand.Text = "Brand:";
             // 
-            // btnPreviousPage
-            // 
-            this.btnPreviousPage.AutoSize = true;
-            this.btnPreviousPage.Location = new System.Drawing.Point(384, 449);
-            this.btnPreviousPage.Name = "btnPreviousPage";
-            this.btnPreviousPage.Size = new System.Drawing.Size(75, 27);
-            this.btnPreviousPage.TabIndex = 16;
-            this.btnPreviousPage.Text = "Previous";
-            this.btnPreviousPage.UseVisualStyleBackColor = true;
-            this.btnPreviousPage.Click += new System.EventHandler(this.btnPreviousPage_Click);
-            // 
-            // btnNextPage
-            // 
-            this.btnNextPage.AutoSize = true;
-            this.btnNextPage.Location = new System.Drawing.Point(578, 449);
-            this.btnNextPage.Name = "btnNextPage";
-            this.btnNextPage.Size = new System.Drawing.Size(75, 27);
-            this.btnNextPage.TabIndex = 15;
-            this.btnNextPage.Text = "Next";
-            this.btnNextPage.UseVisualStyleBackColor = true;
-            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
-            // 
-            // txtPageNo
-            // 
-            this.txtPageNo.Location = new System.Drawing.Point(521, 449);
-            this.txtPageNo.Name = "txtPageNo";
-            this.txtPageNo.Size = new System.Drawing.Size(29, 22);
-            this.txtPageNo.TabIndex = 14;
-            this.txtPageNo.Text = "1";
-            this.txtPageNo.TextChanged += new System.EventHandler(this.txtPageNo_TextChanged);
-            this.txtPageNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPageNo_KeyPress);
-            // 
-            // lblPageNo
-            // 
-            this.lblPageNo.AutoSize = true;
-            this.lblPageNo.Location = new System.Drawing.Point(477, 449);
-            this.lblPageNo.Name = "lblPageNo";
-            this.lblPageNo.Size = new System.Drawing.Size(49, 17);
-            this.lblPageNo.TabIndex = 13;
-            this.lblPageNo.Text = "Page: ";
-            // 
-            // lblTotalValue
-            // 
-            this.lblTotalValue.AutoSize = true;
-            this.lblTotalValue.Location = new System.Drawing.Point(736, 449);
-            this.lblTotalValue.Name = "lblTotalValue";
-            this.lblTotalValue.Size = new System.Drawing.Size(16, 17);
-            this.lblTotalValue.TabIndex = 12;
-            this.lblTotalValue.Text = "0";
-            // 
-            // lblTotal
-            // 
-            this.lblTotal.AutoSize = true;
-            this.lblTotal.Location = new System.Drawing.Point(693, 449);
-            this.lblTotal.Name = "lblTotal";
-            this.lblTotal.Size = new System.Drawing.Size(48, 17);
-            this.lblTotal.TabIndex = 11;
-            this.lblTotal.Text = "Total: ";
-            this.lblTotal.Click += new System.EventHandler(this.label1_Click);
-            // 
             // btnCancelGetDevices
             // 
             this.btnCancelGetDevices.Location = new System.Drawing.Point(1090, 25);
@@ -516,6 +364,9 @@
             this.dataGridDevices.AllowUserToAddRows = false;
             this.dataGridDevices.AllowUserToDeleteRows = false;
             this.dataGridDevices.AllowUserToOrderColumns = true;
+            this.dataGridDevices.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridDevices.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridDevices.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
             this.dataGridDevices.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -523,7 +374,7 @@
             this.dataGridDevices.Location = new System.Drawing.Point(9, 67);
             this.dataGridDevices.Name = "dataGridDevices";
             this.dataGridDevices.RowTemplate.Height = 24;
-            this.dataGridDevices.Size = new System.Drawing.Size(1164, 346);
+            this.dataGridDevices.Size = new System.Drawing.Size(1400, 546);
             this.dataGridDevices.TabIndex = 10;
             this.dataGridDevices.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridDevices_CellContentClick_1);
             // 
@@ -539,6 +390,7 @@
             // grpAddComponents
             // 
             this.grpAddComponents.AutoSize = true;
+            this.grpAddComponents.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grpAddComponents.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.grpAddComponents.Controls.Add(this.dropdownAddModelBrand);
             this.grpAddComponents.Controls.Add(this.lblAddModelBrand);
@@ -548,9 +400,10 @@
             this.grpAddComponents.Controls.Add(this.btnSave);
             this.grpAddComponents.Controls.Add(this.txtAddModelName);
             this.grpAddComponents.Controls.Add(this.dataGridCommon);
-            this.grpAddComponents.Location = new System.Drawing.Point(12, 141);
+            this.grpAddComponents.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grpAddComponents.Location = new System.Drawing.Point(3, 108);
             this.grpAddComponents.Name = "grpAddComponents";
-            this.grpAddComponents.Size = new System.Drawing.Size(1198, 446);
+            this.grpAddComponents.Size = new System.Drawing.Size(1418, 646);
             this.grpAddComponents.TabIndex = 0;
             this.grpAddComponents.TabStop = false;
             this.grpAddComponents.Text = "Add Device";
@@ -596,9 +449,12 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(117, 392);
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancel.AutoSize = true;
+            this.btnCancel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnCancel.Location = new System.Drawing.Point(115, 613);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(83, 33);
+            this.btnCancel.Size = new System.Drawing.Size(61, 27);
             this.btnCancel.TabIndex = 9;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -606,9 +462,12 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(18, 392);
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSave.AutoSize = true;
+            this.btnSave.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSave.Location = new System.Drawing.Point(30, 613);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(83, 33);
+            this.btnSave.Size = new System.Drawing.Size(50, 27);
             this.btnSave.TabIndex = 7;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
@@ -625,21 +484,207 @@
             // dataGridCommon
             // 
             this.dataGridCommon.AllowUserToAddRows = false;
+            this.dataGridCommon.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridCommon.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridCommon.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.dataGridCommon.Location = new System.Drawing.Point(18, 47);
             this.dataGridCommon.Name = "dataGridCommon";
             this.dataGridCommon.RowTemplate.Height = 24;
-            this.dataGridCommon.Size = new System.Drawing.Size(1155, 340);
+            this.dataGridCommon.Size = new System.Drawing.Size(1353, 554);
             this.dataGridCommon.TabIndex = 15;
             this.dataGridCommon.Visible = false;
             this.dataGridCommon.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridAddDevices_CellContentClick);
+            // 
+            // groupBoxActivities
+            // 
+            this.groupBoxActivities.AutoSize = true;
+            this.groupBoxActivities.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.groupBoxActivities.Controls.Add(this.btnAddDevice);
+            this.groupBoxActivities.Controls.Add(this.lblLoading);
+            this.groupBoxActivities.Controls.Add(this.btnSoldOut);
+            this.groupBoxActivities.Controls.Add(this.btnShowDevice);
+            this.groupBoxActivities.Controls.Add(this.btnAddBrand);
+            this.groupBoxActivities.Controls.Add(this.btnReport);
+            this.groupBoxActivities.Controls.Add(this.btnAddModel);
+            this.groupBoxActivities.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBoxActivities.Location = new System.Drawing.Point(3, 18);
+            this.groupBoxActivities.Name = "groupBoxActivities";
+            this.groupBoxActivities.Size = new System.Drawing.Size(1418, 90);
+            this.groupBoxActivities.TabIndex = 20;
+            this.groupBoxActivities.TabStop = false;
+            this.groupBoxActivities.Text = "Activities:";
+            // 
+            // btnAddDevice
+            // 
+            this.btnAddDevice.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddDevice.AutoSize = true;
+            this.btnAddDevice.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnAddDevice.Location = new System.Drawing.Point(18, 42);
+            this.btnAddDevice.Name = "btnAddDevice";
+            this.btnAddDevice.Size = new System.Drawing.Size(90, 27);
+            this.btnAddDevice.TabIndex = 1;
+            this.btnAddDevice.Text = "Add Device";
+            this.btnAddDevice.UseVisualStyleBackColor = true;
+            this.btnAddDevice.Click += new System.EventHandler(this.btnAddDevice_Click);
+            // 
+            // lblLoading
+            // 
+            this.lblLoading.AutoSize = true;
+            this.lblLoading.Location = new System.Drawing.Point(529, 18);
+            this.lblLoading.Name = "lblLoading";
+            this.lblLoading.Size = new System.Drawing.Size(71, 17);
+            this.lblLoading.TabIndex = 18;
+            this.lblLoading.Text = "Loading...";
+            this.lblLoading.Visible = false;
+            // 
+            // btnSoldOut
+            // 
+            this.btnSoldOut.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSoldOut.AutoSize = true;
+            this.btnSoldOut.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSoldOut.Location = new System.Drawing.Point(1118, 42);
+            this.btnSoldOut.Name = "btnSoldOut";
+            this.btnSoldOut.Size = new System.Drawing.Size(70, 27);
+            this.btnSoldOut.TabIndex = 19;
+            this.btnSoldOut.Text = "Sold out";
+            this.btnSoldOut.UseVisualStyleBackColor = true;
+            this.btnSoldOut.Click += new System.EventHandler(this.btnSoldOut_Click);
+            // 
+            // btnShowDevice
+            // 
+            this.btnShowDevice.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnShowDevice.AutoSize = true;
+            this.btnShowDevice.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnShowDevice.Location = new System.Drawing.Point(238, 42);
+            this.btnShowDevice.Name = "btnShowDevice";
+            this.btnShowDevice.Size = new System.Drawing.Size(99, 27);
+            this.btnShowDevice.TabIndex = 4;
+            this.btnShowDevice.Text = "Show Device";
+            this.btnShowDevice.UseVisualStyleBackColor = true;
+            this.btnShowDevice.Click += new System.EventHandler(this.btnShowDevice_Click);
+            // 
+            // btnAddBrand
+            // 
+            this.btnAddBrand.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddBrand.AutoSize = true;
+            this.btnAddBrand.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnAddBrand.Location = new System.Drawing.Point(458, 42);
+            this.btnAddBrand.Name = "btnAddBrand";
+            this.btnAddBrand.Size = new System.Drawing.Size(85, 27);
+            this.btnAddBrand.TabIndex = 11;
+            this.btnAddBrand.Text = "Add Brand";
+            this.btnAddBrand.UseVisualStyleBackColor = true;
+            this.btnAddBrand.Click += new System.EventHandler(this.btnAddBrand_Click);
+            // 
+            // btnReport
+            // 
+            this.btnReport.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnReport.AutoSize = true;
+            this.btnReport.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnReport.Location = new System.Drawing.Point(898, 42);
+            this.btnReport.Name = "btnReport";
+            this.btnReport.Size = new System.Drawing.Size(95, 27);
+            this.btnReport.TabIndex = 17;
+            this.btnReport.Text = "Stock report";
+            this.btnReport.UseVisualStyleBackColor = true;
+            this.btnReport.Click += new System.EventHandler(this.btnReport_Click);
+            // 
+            // btnAddModel
+            // 
+            this.btnAddModel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddModel.AutoSize = true;
+            this.btnAddModel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnAddModel.Location = new System.Drawing.Point(678, 42);
+            this.btnAddModel.Name = "btnAddModel";
+            this.btnAddModel.Size = new System.Drawing.Size(85, 27);
+            this.btnAddModel.TabIndex = 12;
+            this.btnAddModel.Text = "Add Model";
+            this.btnAddModel.UseVisualStyleBackColor = true;
+            this.btnAddModel.Click += new System.EventHandler(this.btnAddModel_Click);
+            // 
+            // btnNextPage
+            // 
+            this.btnNextPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnNextPage.AutoSize = true;
+            this.btnNextPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnNextPage.Location = new System.Drawing.Point(844, 619);
+            this.btnNextPage.Name = "btnNextPage";
+            this.btnNextPage.Size = new System.Drawing.Size(46, 27);
+            this.btnNextPage.TabIndex = 15;
+            this.btnNextPage.Text = "Next";
+            this.btnNextPage.UseVisualStyleBackColor = true;
+            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
+            // 
+            // txtPageNo
+            // 
+            this.txtPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtPageNo.Location = new System.Drawing.Point(649, 624);
+            this.txtPageNo.MaximumSize = new System.Drawing.Size(26, 22);
+            this.txtPageNo.MaxLength = 100;
+            this.txtPageNo.Name = "txtPageNo";
+            this.txtPageNo.Size = new System.Drawing.Size(26, 22);
+            this.txtPageNo.TabIndex = 14;
+            this.txtPageNo.Text = "1";
+            this.txtPageNo.TextChanged += new System.EventHandler(this.txtPageNo_TextChanged);
+            this.txtPageNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPageNo_KeyPress);
+            // 
+            // lblTotal
+            // 
+            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblTotal.AutoSize = true;
+            this.lblTotal.Location = new System.Drawing.Point(1115, 626);
+            this.lblTotal.Name = "lblTotal";
+            this.lblTotal.Size = new System.Drawing.Size(48, 17);
+            this.lblTotal.TabIndex = 11;
+            this.lblTotal.Text = "Total: ";
+            this.lblTotal.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // lblPageNo
+            // 
+            this.lblPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblPageNo.AutoSize = true;
+            this.lblPageNo.Location = new System.Drawing.Point(594, 624);
+            this.lblPageNo.Name = "lblPageNo";
+            this.lblPageNo.Size = new System.Drawing.Size(49, 17);
+            this.lblPageNo.TabIndex = 13;
+            this.lblPageNo.Text = "Page: ";
+            // 
+            // lblTotalValue
+            // 
+            this.lblTotalValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblTotalValue.AutoSize = true;
+            this.lblTotalValue.Location = new System.Drawing.Point(1169, 627);
+            this.lblTotalValue.Name = "lblTotalValue";
+            this.lblTotalValue.Size = new System.Drawing.Size(16, 17);
+            this.lblTotalValue.TabIndex = 12;
+            this.lblTotalValue.Text = "0";
+            // 
+            // btnPreviousPage
+            // 
+            this.btnPreviousPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPreviousPage.AutoSize = true;
+            this.btnPreviousPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnPreviousPage.Location = new System.Drawing.Point(406, 619);
+            this.btnPreviousPage.Name = "btnPreviousPage";
+            this.btnPreviousPage.Size = new System.Drawing.Size(73, 27);
+            this.btnPreviousPage.TabIndex = 16;
+            this.btnPreviousPage.Text = "Previous";
+            this.btnPreviousPage.UseVisualStyleBackColor = true;
+            this.btnPreviousPage.Click += new System.EventHandler(this.btnPreviousPage_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1320, 701);
+            this.ClientSize = new System.Drawing.Size(1424, 757);
             this.Controls.Add(this.grpLaptopInformationSystem);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
@@ -653,6 +698,8 @@
             this.grpAddComponents.ResumeLayout(false);
             this.grpAddComponents.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridCommon)).EndInit();
+            this.groupBoxActivities.ResumeLayout(false);
+            this.groupBoxActivities.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -661,7 +708,6 @@
         #endregion
 
         private System.Windows.Forms.GroupBox grpLaptopInformationSystem;
-        private System.Windows.Forms.Label lblActivivies;
         private System.Windows.Forms.Button btnShowDevice;
         private System.Windows.Forms.Button btnAddDevice;
         private System.Windows.Forms.GroupBox grpShowDevices;
@@ -675,12 +721,6 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.DataGridView dataGridDevices;
-        private System.Windows.Forms.Label lblTotal;
-        private System.Windows.Forms.Label lblTotalValue;
-        private System.Windows.Forms.Button btnPreviousPage;
-        private System.Windows.Forms.Button btnNextPage;
-        private System.Windows.Forms.TextBox txtPageNo;
-        private System.Windows.Forms.Label lblPageNo;
         private System.Windows.Forms.Button btnAddModel;
         private System.Windows.Forms.Button btnAddBrand;
         private System.Windows.Forms.TextBox txtAddBrandName;
@@ -709,6 +749,13 @@
         private System.Windows.Forms.ComboBox dropDownSoldTo;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.GroupBox groupBoxActivities;
+        private System.Windows.Forms.Label lblTotalValue;
+        private System.Windows.Forms.Button btnPreviousPage;
+        private System.Windows.Forms.Label lblTotal;
+        private System.Windows.Forms.Label lblPageNo;
+        private System.Windows.Forms.Button btnNextPage;
+        private System.Windows.Forms.TextBox txtPageNo;
     }
 }
 

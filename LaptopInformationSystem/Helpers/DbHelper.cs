@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace LaptopInformationSystem.Helpers
@@ -59,13 +60,14 @@ namespace LaptopInformationSystem.Helpers
         {
             try
             {
-                string addDeviceCommand = "INSERT INTO devices(serial_number, type, purchased_on, purchased_from, sold_on, buyer_id, invoice_number, model_id) VALUES (@serial_number, @type, @purchased_on, @purchased_from, @sold_on, @buyer_id, @invoice_number, @model_id)";
+                var addDeviceCommand = new StringBuilder("INSERT INTO devices(serial_number, type, purchased_on, purchased_from, sold_on, buyer_id, invoice_number, model_id) VALUES ");
+                var addBuyerCommand = new StringBuilder("INSERT IGNORE INTO buyers(name) VALUES ");
+
+                var argsDevice = new List<Tuple<string, string, string, string, string, string, string, Tuple<int>>>();
+                var argsBuyer = new List<Tuple<string>>();
+
                 foreach (DataRow r in newDevices.Rows)
                 {
-                    int? soldToId;
-
-                    soldToId = r["Sold to"] != null ? this.GetSoldToId(r["Sold to"].ToString()) : null;
-
                     string purchasedOn = r["Purchased on"] != null ? r["Purchased on"].ToString().Split(' ')[0] : null;
                     if (purchasedOn != null)
                     {
@@ -90,24 +92,72 @@ namespace LaptopInformationSystem.Helpers
                             soldOn = null;
                         }
                     }
+                    int cntDevice = argsDevice.Count();
+                    int cntBuyer = argsBuyer.Count();
 
+                    if (cntDevice != 0)
+                    {
+                        addDeviceCommand.Append(",");
+                    }
+
+                    if (cntBuyer != 0)
+                    {
+                        addBuyerCommand.Append(",");
+                    }
+
+                    addDeviceCommand.AppendFormat("(@serial_number{0}, @type{0}, @purchased_on{0}, @purchased_from{0}, @sold_on{0}, (SELECT b.id FROM buyers b WHERE TRIM(LOWER(name)) = TRIM(LOWER(@buyer{0})) LIMIT 1), @invoice_number{0}, @model_id{0})", cntDevice);
+                    addBuyerCommand.AppendFormat("(@name{0})", cntBuyer);
+
+                    argsDevice.Add(new Tuple<string, string, string, string, string, string, string, Tuple<int>>(r["S/N"].ToString(), r["Type"].ToString(), purchasedOn, r["Purchased from"].ToString(), soldOn, r["Sold to"].ToString(), r["Invoice number"].ToString(), new Tuple<int>(Convert.ToInt32(r["Model"])) ));
+                    argsBuyer.Add(new Tuple<string>(r["Sold to"].ToString() ));
+                }
+
+                if (argsDevice.Count != 0)
+                {
                     this.GetDbConnection();
 
-                    MySqlCommand cmd = this.conn.CreateCommand();
-                    cmd.CommandText = addDeviceCommand;
-                    cmd.Parameters.AddWithValue("@serial_number", r["S/N"]);
-                    cmd.Parameters.AddWithValue("@type", r["Type"]);
-                    cmd.Parameters.AddWithValue("@purchased_on", purchasedOn);
-                    cmd.Parameters.AddWithValue("@purchased_from", r["Purchased from"]);
-                    cmd.Parameters.AddWithValue("@buyer_id", soldToId);
-                    cmd.Parameters.AddWithValue("@sold_on", soldOn);
-                    cmd.Parameters.AddWithValue("@invoice_number", r["Invoice number"]);
-                    cmd.Parameters.AddWithValue("@model_id", r["Model"]);
-
                     this.conn.Open();
-                    cmd.ExecuteNonQuery();
-                    this.conn.Close();
+
+                    MySqlTransaction tran = this.conn.BeginTransaction(IsolationLevel.ReadUncommitted);
+                    MySqlCommand cmdBuyers = new MySqlCommand(addBuyerCommand.ToString(), this.conn, tran);
+                    MySqlCommand cmdDevices = new MySqlCommand(addDeviceCommand.ToString(), this.conn, tran);
+                    
+                    for (var i = 0; i != argsBuyer.Count; i++)
+                    {
+                        cmdBuyers.Parameters.AddWithValue("@name" + i, argsBuyer[i].Item1);
+
+                        cmdDevices.Parameters.AddWithValue("@serial_number" + i, argsDevice[i].Item1);
+                        cmdDevices.Parameters.AddWithValue("@type" + i, argsDevice[i].Item2);
+                        cmdDevices.Parameters.AddWithValue("@purchased_on" + i, argsDevice[i].Item3);
+                        cmdDevices.Parameters.AddWithValue("@purchased_from" + i, argsDevice[i].Item4);
+                        cmdDevices.Parameters.AddWithValue("@sold_on" + i, argsDevice[i].Item5);
+                        cmdDevices.Parameters.AddWithValue("@buyer" + i, argsDevice[i].Item6);
+                        cmdDevices.Parameters.AddWithValue("@invoice_number" + i, argsDevice[i].Item7);
+                        cmdDevices.Parameters.AddWithValue("@model_id" + i, argsDevice[i].Rest.Item1);
+                    }
+
+                    try
+                    { 
+                        cmdBuyers.ExecuteNonQuery();
+                        cmdDevices.ExecuteNonQuery();
+                        tran.Commit();
+                        this.conn.Close();
+                    }
+                    catch (MySqlException ex)
+                    {
+                        tran.Rollback();
+                        Console.WriteLine("Error in insert : " + ex.Message);
+                    }
+                    finally
+                    {
+                        if (this.conn.State == ConnectionState.Open)
+                        {
+                            this.conn.Close();
+                        }
+                    }
+
                 }
+                    
 
                 Console.WriteLine("Devices Added, total: " + newDevices.Rows.Count);
                 return (newDevices.Rows.Count + " devices added!!!");
@@ -133,13 +183,16 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
+
         public string UpdateSoldDevices(DataTable soldDevices, string soldTo, string soldOn)
         {
             try
             {
                 int? soldToId = this.GetSoldToId(soldTo);
 
-                string updateDeviceCommand = "UPDATE devices SET sold_on = @soldOn, buyer_id = @soldToId WHERE TRIM(LOWER(serial_number)) = TRIM(LOWER(@sn));";
+                var updateDeviceCommand = new StringBuilder("");
+                var argsDevice = new List<Tuple<string, int?, string>>();
+
                 foreach (DataRow r in soldDevices.Rows)
                 {
                     soldOn = soldOn != null ? soldOn.ToString().Split(' ')[0] : null;
@@ -155,18 +208,53 @@ namespace LaptopInformationSystem.Helpers
                         }
                     }
 
+                    argsDevice.Add(new Tuple<string, int?, string>(soldOn, soldToId, r["S/N"].ToString()));
+                    int cntDevice = argsDevice.Count();
+                    
+                    if (cntDevice != 0)
+                    {
+                        updateDeviceCommand.AppendFormat("UPDATE devices SET sold_on = @soldOn{0}, buyer_id = @soldToId{0} WHERE TRIM(LOWER(serial_number)) = TRIM(LOWER(@sn{0}));", cntDevice-1);
+                    }
+                    
+                }
+
+                if (argsDevice.Count != 0)
+                {
                     this.GetDbConnection();
 
-                    MySqlCommand cmd = this.conn.CreateCommand();
-                    cmd.CommandText = updateDeviceCommand;
-                    cmd.Parameters.AddWithValue("@soldOn", soldOn);
-                    cmd.Parameters.AddWithValue("@soldToId", soldToId);
-                    cmd.Parameters.AddWithValue("@sn", r["S/N"]);
-
                     this.conn.Open();
-                    cmd.ExecuteNonQuery();
-                    this.conn.Close();
+
+                    MySqlTransaction tran = this.conn.BeginTransaction(IsolationLevel.ReadUncommitted);
+                    MySqlCommand cmdDevices = new MySqlCommand(updateDeviceCommand.ToString(), this.conn, tran);
+
+                    for (var i = 0; i != argsDevice.Count; i++)
+                    {
+                        cmdDevices.Parameters.AddWithValue("@soldOn" + i, argsDevice[i].Item1);
+                        cmdDevices.Parameters.AddWithValue("@soldToId" + i, argsDevice[i].Item2);
+                        cmdDevices.Parameters.AddWithValue("@sn" + i, argsDevice[i].Item3);
+                    }
+
+                    try
+                    {
+                        cmdDevices.ExecuteNonQuery();
+                        tran.Commit();
+                        this.conn.Close();
+                    }
+                    catch (MySqlException ex)
+                    {
+                        tran.Rollback();
+                        Console.WriteLine("Error in update : " + ex.Message);
+                    }
+                    finally
+                    {
+                        if (this.conn.State == ConnectionState.Open)
+                        {
+                            this.conn.Close();
+                        }
+                    }
+
                 }
+
                 Console.WriteLine("Devices Sold, total: " + soldDevices.Rows.Count);
                 return (soldDevices.Rows.Count + " devices sold!!!");
             }
@@ -216,7 +304,7 @@ namespace LaptopInformationSystem.Helpers
                 if(search != "")
                 {
                     search = "%" + search.ToUpper() + "%";
-                    searchCommand = " AND (UPPER(d.serial_number) LIKE @search OR UPPER(m.name) LIKE @search OR UPPER(b.name) LIKE @search)";
+                    searchCommand = " AND (TRIM(UPPER(d.serial_number)) LIKE TRIM(UPPER(@search)) OR TRIM(UPPER(m.name)) LIKE TRIM(UPPER(@search)) OR TRIM(UPPER(buy.name)) LIKE TRIM(UPPER(@search)) )";
                 }
 
                 if(modelId != 0)
@@ -678,7 +766,8 @@ namespace LaptopInformationSystem.Helpers
                 "SELECT b.name AS Brand, m.name AS Model, COUNT(d.id) AS DeviceCount " +
                 "FROM brands b " +
                 "JOIN models m ON m.brand_id = b.id " +
-                "LEFT JOIN devices d ON d.model_id = m.id AND COALESCE(d.sold_on,'1990-01-01') <= '1990-01-01' AND d.buyer_id <> 0 " +
+                "LEFT JOIN devices d ON d.model_id = m.id " +
+                "AND ( d.sold_on IS NULL OR d.buyer_id IS NULL OR d.buyer_id IN (SELECT buy.id FROM buyers buy WHERE COALESCE(buy.name,'') = '') )" +
                 "WHERE COALESCE(m.name,'') <> '' " +
                 "GROUP BY b.name, m.name " +
                 "ORDER BY b.name, m.name";
@@ -787,7 +876,7 @@ namespace LaptopInformationSystem.Helpers
             {
                 this.GetDbConnection();
 
-                string addDeviceCommand = "INSERT INTO brands(name) VALUES (@name);";
+                string addDeviceCommand = "INSERT IGNORE INTO brands(name) VALUES (@name);";
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = addDeviceCommand;
@@ -825,10 +914,11 @@ namespace LaptopInformationSystem.Helpers
             DataTable results = new DataTable();
             string getBrandsCommand = "SELECT id AS ID, name AS Model FROM models";
             string brandFilter = "";
+            string orderBy = " ORDER BY name";
 
             if(brandId != 0)
             {
-                brandFilter = " WHERE brand_id = @brandId ORDER BY name";
+                brandFilter = " WHERE brand_id = @brandId";
             }
 
             try
@@ -836,7 +926,7 @@ namespace LaptopInformationSystem.Helpers
                 this.GetDbConnection();
 
                 MySqlCommand cmd = this.conn.CreateCommand();
-                cmd.CommandText = getBrandsCommand + brandFilter;
+                cmd.CommandText = getBrandsCommand + brandFilter + orderBy;
                 cmd.Parameters.AddWithValue("@brandId", brandId);
 
                 this.conn.Open();
@@ -878,7 +968,7 @@ namespace LaptopInformationSystem.Helpers
             {
                 this.GetDbConnection();
 
-                string addDeviceCommand = "INSERT INTO models(name, brand_id) VALUES (@name, @brandId);";
+                string addDeviceCommand = "INSERT IGNORE INTO models(name, brand_id) VALUES (@name, @brandId);";
 
                 MySqlCommand cmd = this.conn.CreateCommand();
                 cmd.CommandText = addDeviceCommand;
