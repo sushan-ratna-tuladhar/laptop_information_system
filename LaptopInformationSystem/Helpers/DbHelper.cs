@@ -183,7 +183,6 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-
         public string UpdateSoldDevices(DataTable soldDevices, string soldTo, string soldOn)
         {
             try
@@ -279,7 +278,7 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir)
+        public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir, DateTime? soldOnDate)
         {
             DataTable results = new DataTable();
             int offset = (pageNumber - 1) * pageSize;
@@ -305,6 +304,14 @@ namespace LaptopInformationSystem.Helpers
                 {
                     search = "%" + search.ToUpper() + "%";
                     searchCommand = " AND (TRIM(UPPER(d.serial_number)) LIKE TRIM(UPPER(@search)) OR TRIM(UPPER(m.name)) LIKE TRIM(UPPER(@search)) OR TRIM(UPPER(buy.name)) LIKE TRIM(UPPER(@search)) )";
+                }
+
+                if(soldOnDate != null)
+                {
+                    if(Convert.ToDateTime(soldOnDate) > Convert.ToDateTime("2020-01-01"))
+                    {
+                        searchCommand = searchCommand + " AND (d.sold_on = @soldOnDate)";
+                    }
                 }
 
                 if(modelId != 0)
@@ -342,6 +349,7 @@ namespace LaptopInformationSystem.Helpers
                 cmd.Parameters.AddWithValue("@orderBy", orderBy);
                 cmd.Parameters.AddWithValue("@orderDir", orderDir);
                 cmd.Parameters.AddWithValue("@modelId", modelId);
+                cmd.Parameters.AddWithValue("@soldOnDate", Convert.ToDateTime(soldOnDate).ToString("yyyy-MM-dd"));
 
                 this.conn.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
@@ -650,8 +658,6 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-
-
         public string DeleteDevice(string serialNumber)
         {
             try
@@ -685,7 +691,7 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public string GetTotalDevices(string search, int modelId)
+        public string GetTotalDevices(string search, int modelId, DateTime? soldOnDate)
         {
             string total = "0";
             try
@@ -700,7 +706,14 @@ namespace LaptopInformationSystem.Helpers
                     search = "%" + search.ToUpper() + "%";
                     searchCommand = " AND (UPPER(d.serial_number) LIKE @search OR UPPER(m.name) LIKE @search OR UPPER(b.name) LIKE @search)";
                 }
-                if(modelId != 0)
+                if (soldOnDate != null)
+                {
+                    if(Convert.ToDateTime(soldOnDate) > Convert.ToDateTime("2020-01-01"))
+                    {
+                        searchCommand = searchCommand + " AND (d.sold_on = @soldOnDate)";
+                    }
+                }
+                if (modelId != 0)
                 {
                     modelCommand = " AND d.model_id = @modelId";
                 }
@@ -708,6 +721,7 @@ namespace LaptopInformationSystem.Helpers
                 cmd.CommandText = "SELECT COUNT(1) FROM devices d JOIN models m ON m.id = d.model_id JOIN brands b ON b.id = m.brand_id WHERE 1=1" + searchCommand + modelCommand;
                 cmd.Parameters.AddWithValue("@search", search);
                 cmd.Parameters.AddWithValue("@modelId", modelId);
+                cmd.Parameters.AddWithValue("@soldOnDate", Convert.ToDateTime(soldOnDate).ToString("yyyy-MM-dd"));
 
                 this.conn.Open();
                 total = Convert.ToString(cmd.ExecuteScalar());
@@ -909,7 +923,7 @@ namespace LaptopInformationSystem.Helpers
         }
 
         //Models
-        public DataTable GetModels(int brandId)
+        public DataTable GetModels(int brandId, Boolean isDropDown = true)
         {
             DataTable results = new DataTable();
             string getBrandsCommand = "SELECT id AS ID, name AS Model FROM models";
@@ -932,15 +946,41 @@ namespace LaptopInformationSystem.Helpers
                 this.conn.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    results.Columns.AddRange(new DataColumn[2] {
-                        new DataColumn("ID"),
-                        new DataColumn("Model")
-                    });
-
-                    while (dr.Read())
+                    if(isDropDown)
                     {
-                        results.Rows.Add(dr["ID"], dr["Model"]);
+                        results.Columns.AddRange(new DataColumn[2] {
+                            new DataColumn("ID"),
+                            new DataColumn("Model")
+                        });
+
+                        while (dr.Read())
+                        {
+                            results.Rows.Add(dr["ID"], dr["Model"]);
+                        }
+
+                    } else
+                    {
+                        results.Columns.AddRange(new DataColumn[3] {
+                            new DataColumn("No."),
+                            new DataColumn("ID"),
+                            new DataColumn("Model")
+                        });
+
+                        //Set AutoIncrement True for the First Column.
+                        results.Columns["No."].AutoIncrement = true;
+
+                        //Set the Starting or Seed value.
+                        results.Columns["No."].AutoIncrementSeed = 1;
+
+                        //Set the Increment value.
+                        results.Columns["No."].AutoIncrementStep = 1;
+
+                        while (dr.Read())
+                        {
+                            results.Rows.Add(null, dr["ID"], dr["Model"]);
+                        }
                     }
+
                 }
 
                 this.conn.Close();
@@ -1000,6 +1040,40 @@ namespace LaptopInformationSystem.Helpers
                 }
             }
         }
+
+        public string DeleteModel(int modelId)
+        {
+            try
+            {
+                this.GetDbConnection();
+
+                string deleteModelCommand = "UPDATE devices SET model_id = null WHERE model_id = @modelId; DELETE FROM models WHERE id = @modelId";
+
+                MySqlCommand cmd = this.conn.CreateCommand();
+                cmd.CommandText = deleteModelCommand;
+                cmd.Parameters.AddWithValue("@modelId", modelId);
+                Console.WriteLine("Deleting Model with id : " + modelId);
+                this.conn.Open();
+                cmd.ExecuteReader();
+                this.conn.Close();
+                Console.WriteLine("Deleted model with id : " + modelId);
+                return ("Model : " + modelId + " Deleted!!!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error on DeleteModel : " + ex.Message + ", stack: " + ex.StackTrace);
+                return ("Something went wrong");
+            }
+            finally
+            {
+                if (this.conn.State == ConnectionState.Open)
+                {
+                    this.conn.Close();
+                }
+            }
+
+        }
+
 
         //Buyers
         public DataTable GetBuyers()

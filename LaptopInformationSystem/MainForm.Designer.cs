@@ -31,7 +31,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.grpLaptopInformationSystem = new System.Windows.Forms.GroupBox();
             this.grpShowDevices = new System.Windows.Forms.GroupBox();
-            this.dateTimePickerSoldOn = new System.Windows.Forms.DateTimePicker();
+            this.lblTotalValue = new System.Windows.Forms.Label();
+            this.btnPreviousPage = new System.Windows.Forms.Button();
+            this.lblTotal = new System.Windows.Forms.Label();
+            this.lblPageNo = new System.Windows.Forms.Label();
+            this.btnNextPage = new System.Windows.Forms.Button();
+            this.txtPageNo = new System.Windows.Forms.TextBox();
+            this.dateTimePickerOuter = new System.Windows.Forms.DateTimePicker();
             this.dropDownSoldTo = new System.Windows.Forms.ComboBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -53,8 +59,8 @@
             this.lblPageSize = new System.Windows.Forms.Label();
             this.txtCodeSearch = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
-            this.dataGridDevices = new System.Windows.Forms.DataGridView();
             this.lblSoldTo = new System.Windows.Forms.Label();
+            this.dataGridDevices = new System.Windows.Forms.DataGridView();
             this.grpAddComponents = new System.Windows.Forms.GroupBox();
             this.dropdownAddModelBrand = new System.Windows.Forms.ComboBox();
             this.lblAddModelBrand = new System.Windows.Forms.Label();
@@ -72,12 +78,7 @@
             this.btnAddBrand = new System.Windows.Forms.Button();
             this.btnReport = new System.Windows.Forms.Button();
             this.btnAddModel = new System.Windows.Forms.Button();
-            this.btnNextPage = new System.Windows.Forms.Button();
-            this.txtPageNo = new System.Windows.Forms.TextBox();
-            this.lblTotal = new System.Windows.Forms.Label();
-            this.lblPageNo = new System.Windows.Forms.Label();
-            this.lblTotalValue = new System.Windows.Forms.Label();
-            this.btnPreviousPage = new System.Windows.Forms.Button();
+            this.btnModels = new System.Windows.Forms.Button();
             this.grpLaptopInformationSystem.SuspendLayout();
             this.grpShowDevices.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridDevices)).BeginInit();
@@ -112,8 +113,7 @@
             this.grpShowDevices.Controls.Add(this.lblPageNo);
             this.grpShowDevices.Controls.Add(this.btnNextPage);
             this.grpShowDevices.Controls.Add(this.txtPageNo);
-            this.grpShowDevices.Controls.Add(this.dataGridDevices);
-            this.grpShowDevices.Controls.Add(this.dateTimePickerSoldOn);
+            this.grpShowDevices.Controls.Add(this.dateTimePickerOuter);
             this.grpShowDevices.Controls.Add(this.dropDownSoldTo);
             this.grpShowDevices.Controls.Add(this.comboBox2);
             this.grpShowDevices.Controls.Add(this.comboBox1);
@@ -136,6 +136,7 @@
             this.grpShowDevices.Controls.Add(this.txtCodeSearch);
             this.grpShowDevices.Controls.Add(this.lblSearch);
             this.grpShowDevices.Controls.Add(this.lblSoldTo);
+            this.grpShowDevices.Controls.Add(this.dataGridDevices);
             this.grpShowDevices.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpShowDevices.Location = new System.Drawing.Point(3, 108);
             this.grpShowDevices.Name = "grpShowDevices";
@@ -146,13 +147,84 @@
             this.grpShowDevices.Visible = false;
             this.grpShowDevices.Enter += new System.EventHandler(this.grpShowDevices_Enter);
             // 
-            // dateTimePickerSoldOn
+            // lblTotalValue
             // 
-            this.dateTimePickerSoldOn.Location = new System.Drawing.Point(621, 30);
-            this.dateTimePickerSoldOn.Name = "dateTimePickerSoldOn";
-            this.dateTimePickerSoldOn.Size = new System.Drawing.Size(269, 22);
-            this.dateTimePickerSoldOn.TabIndex = 27;
-            this.dateTimePickerSoldOn.ValueChanged += new System.EventHandler(this.dateTimePickerSoldOn_ValueChanged);
+            this.lblTotalValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblTotalValue.AutoSize = true;
+            this.lblTotalValue.Location = new System.Drawing.Point(1169, 627);
+            this.lblTotalValue.Name = "lblTotalValue";
+            this.lblTotalValue.Size = new System.Drawing.Size(16, 17);
+            this.lblTotalValue.TabIndex = 12;
+            this.lblTotalValue.Text = "0";
+            // 
+            // btnPreviousPage
+            // 
+            this.btnPreviousPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPreviousPage.AutoSize = true;
+            this.btnPreviousPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnPreviousPage.Location = new System.Drawing.Point(406, 619);
+            this.btnPreviousPage.Name = "btnPreviousPage";
+            this.btnPreviousPage.Size = new System.Drawing.Size(73, 27);
+            this.btnPreviousPage.TabIndex = 16;
+            this.btnPreviousPage.Text = "Previous";
+            this.btnPreviousPage.UseVisualStyleBackColor = true;
+            this.btnPreviousPage.Click += new System.EventHandler(this.btnPreviousPage_Click);
+            // 
+            // lblTotal
+            // 
+            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblTotal.AutoSize = true;
+            this.lblTotal.Location = new System.Drawing.Point(1115, 626);
+            this.lblTotal.Name = "lblTotal";
+            this.lblTotal.Size = new System.Drawing.Size(48, 17);
+            this.lblTotal.TabIndex = 11;
+            this.lblTotal.Text = "Total: ";
+            this.lblTotal.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // lblPageNo
+            // 
+            this.lblPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblPageNo.AutoSize = true;
+            this.lblPageNo.Location = new System.Drawing.Point(594, 624);
+            this.lblPageNo.Name = "lblPageNo";
+            this.lblPageNo.Size = new System.Drawing.Size(49, 17);
+            this.lblPageNo.TabIndex = 13;
+            this.lblPageNo.Text = "Page: ";
+            // 
+            // btnNextPage
+            // 
+            this.btnNextPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnNextPage.AutoSize = true;
+            this.btnNextPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnNextPage.Location = new System.Drawing.Point(844, 619);
+            this.btnNextPage.Name = "btnNextPage";
+            this.btnNextPage.Size = new System.Drawing.Size(46, 27);
+            this.btnNextPage.TabIndex = 15;
+            this.btnNextPage.Text = "Next";
+            this.btnNextPage.UseVisualStyleBackColor = true;
+            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
+            // 
+            // txtPageNo
+            // 
+            this.txtPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtPageNo.Location = new System.Drawing.Point(649, 624);
+            this.txtPageNo.MaximumSize = new System.Drawing.Size(26, 22);
+            this.txtPageNo.MaxLength = 100;
+            this.txtPageNo.Name = "txtPageNo";
+            this.txtPageNo.Size = new System.Drawing.Size(26, 22);
+            this.txtPageNo.TabIndex = 14;
+            this.txtPageNo.Text = "1";
+            this.txtPageNo.TextChanged += new System.EventHandler(this.txtPageNo_TextChanged);
+            this.txtPageNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPageNo_KeyPress);
+            // 
+            // dateTimePickerOuter
+            // 
+            this.dateTimePickerOuter.Location = new System.Drawing.Point(941, 30);
+            this.dateTimePickerOuter.Name = "dateTimePickerOuter";
+            this.dateTimePickerOuter.Size = new System.Drawing.Size(269, 22);
+            this.dateTimePickerOuter.TabIndex = 27;
+            this.dateTimePickerOuter.ValueChanged += new System.EventHandler(this.dateTimePickerSoldOn_ValueChanged);
+            this.dateTimePickerOuter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dateTimePickerOuter_MouseDown);
             // 
             // dropDownSoldTo
             // 
@@ -193,7 +265,7 @@
             // lblSoldOn
             // 
             this.lblSoldOn.AutoSize = true;
-            this.lblSoldOn.Location = new System.Drawing.Point(556, 33);
+            this.lblSoldOn.Location = new System.Drawing.Point(875, 33);
             this.lblSoldOn.Name = "lblSoldOn";
             this.lblSoldOn.Size = new System.Drawing.Size(60, 17);
             this.lblSoldOn.TabIndex = 21;
@@ -208,7 +280,7 @@
             // 
             // btnSoldOutSave
             // 
-            this.btnSoldOutSave.Location = new System.Drawing.Point(991, 25);
+            this.btnSoldOutSave.Location = new System.Drawing.Point(1237, 21);
             this.btnSoldOutSave.Name = "btnSoldOutSave";
             this.btnSoldOutSave.Size = new System.Drawing.Size(83, 33);
             this.btnSoldOutSave.TabIndex = 20;
@@ -261,10 +333,11 @@
             // 
             this.dropdownGetDevicesModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dropdownGetDevicesModel.FormattingEnabled = true;
-            this.dropdownGetDevicesModel.Location = new System.Drawing.Point(758, 30);
+            this.dropdownGetDevicesModel.Location = new System.Drawing.Point(715, 30);
             this.dropdownGetDevicesModel.Name = "dropdownGetDevicesModel";
             this.dropdownGetDevicesModel.Size = new System.Drawing.Size(132, 24);
             this.dropdownGetDevicesModel.TabIndex = 20;
+            this.dropdownGetDevicesModel.SelectedIndexChanged += new System.EventHandler(this.dropdownGetDevicesModel_SelectedIndexChanged);
             // 
             // dropdownGetDevicesBrand
             // 
@@ -279,7 +352,7 @@
             // lblModel
             // 
             this.lblModel.AutoSize = true;
-            this.lblModel.Location = new System.Drawing.Point(702, 33);
+            this.lblModel.Location = new System.Drawing.Point(659, 33);
             this.lblModel.Name = "lblModel";
             this.lblModel.Size = new System.Drawing.Size(50, 17);
             this.lblModel.TabIndex = 18;
@@ -296,7 +369,7 @@
             // 
             // btnCancelGetDevices
             // 
-            this.btnCancelGetDevices.Location = new System.Drawing.Point(1090, 25);
+            this.btnCancelGetDevices.Location = new System.Drawing.Point(1326, 21);
             this.btnCancelGetDevices.Name = "btnCancelGetDevices";
             this.btnCancelGetDevices.Size = new System.Drawing.Size(83, 33);
             this.btnCancelGetDevices.TabIndex = 9;
@@ -306,7 +379,7 @@
             // 
             // btnGetDevices
             // 
-            this.btnGetDevices.Location = new System.Drawing.Point(991, 25);
+            this.btnGetDevices.Location = new System.Drawing.Point(1237, 21);
             this.btnGetDevices.Name = "btnGetDevices";
             this.btnGetDevices.Size = new System.Drawing.Size(83, 33);
             this.btnGetDevices.TabIndex = 8;
@@ -359,6 +432,15 @@
             this.lblSearch.Text = "Search: ";
             this.lblSearch.Click += new System.EventHandler(this.lblSearch_Click);
             // 
+            // lblSoldTo
+            // 
+            this.lblSoldTo.AutoSize = true;
+            this.lblSoldTo.Location = new System.Drawing.Point(326, 33);
+            this.lblSoldTo.Name = "lblSoldTo";
+            this.lblSoldTo.Size = new System.Drawing.Size(56, 17);
+            this.lblSoldTo.TabIndex = 20;
+            this.lblSoldTo.Text = "Sold to:";
+            // 
             // dataGridDevices
             // 
             this.dataGridDevices.AllowUserToAddRows = false;
@@ -378,20 +460,12 @@
             this.dataGridDevices.TabIndex = 10;
             this.dataGridDevices.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridDevices_CellContentClick_1);
             // 
-            // lblSoldTo
-            // 
-            this.lblSoldTo.AutoSize = true;
-            this.lblSoldTo.Location = new System.Drawing.Point(326, 33);
-            this.lblSoldTo.Name = "lblSoldTo";
-            this.lblSoldTo.Size = new System.Drawing.Size(56, 17);
-            this.lblSoldTo.TabIndex = 20;
-            this.lblSoldTo.Text = "Sold to:";
-            // 
             // grpAddComponents
             // 
             this.grpAddComponents.AutoSize = true;
             this.grpAddComponents.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grpAddComponents.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.grpAddComponents.Controls.Add(this.btnModels);
             this.grpAddComponents.Controls.Add(this.dropdownAddModelBrand);
             this.grpAddComponents.Controls.Add(this.lblAddModelBrand);
             this.grpAddComponents.Controls.Add(this.txtAddBrandName);
@@ -610,75 +684,15 @@
             this.btnAddModel.UseVisualStyleBackColor = true;
             this.btnAddModel.Click += new System.EventHandler(this.btnAddModel_Click);
             // 
-            // btnNextPage
+            // btnModels
             // 
-            this.btnNextPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnNextPage.AutoSize = true;
-            this.btnNextPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnNextPage.Location = new System.Drawing.Point(844, 619);
-            this.btnNextPage.Name = "btnNextPage";
-            this.btnNextPage.Size = new System.Drawing.Size(46, 27);
-            this.btnNextPage.TabIndex = 15;
-            this.btnNextPage.Text = "Next";
-            this.btnNextPage.UseVisualStyleBackColor = true;
-            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
-            // 
-            // txtPageNo
-            // 
-            this.txtPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtPageNo.Location = new System.Drawing.Point(649, 624);
-            this.txtPageNo.MaximumSize = new System.Drawing.Size(26, 22);
-            this.txtPageNo.MaxLength = 100;
-            this.txtPageNo.Name = "txtPageNo";
-            this.txtPageNo.Size = new System.Drawing.Size(26, 22);
-            this.txtPageNo.TabIndex = 14;
-            this.txtPageNo.Text = "1";
-            this.txtPageNo.TextChanged += new System.EventHandler(this.txtPageNo_TextChanged);
-            this.txtPageNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPageNo_KeyPress);
-            // 
-            // lblTotal
-            // 
-            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblTotal.AutoSize = true;
-            this.lblTotal.Location = new System.Drawing.Point(1115, 626);
-            this.lblTotal.Name = "lblTotal";
-            this.lblTotal.Size = new System.Drawing.Size(48, 17);
-            this.lblTotal.TabIndex = 11;
-            this.lblTotal.Text = "Total: ";
-            this.lblTotal.Click += new System.EventHandler(this.label1_Click);
-            // 
-            // lblPageNo
-            // 
-            this.lblPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblPageNo.AutoSize = true;
-            this.lblPageNo.Location = new System.Drawing.Point(594, 624);
-            this.lblPageNo.Name = "lblPageNo";
-            this.lblPageNo.Size = new System.Drawing.Size(49, 17);
-            this.lblPageNo.TabIndex = 13;
-            this.lblPageNo.Text = "Page: ";
-            // 
-            // lblTotalValue
-            // 
-            this.lblTotalValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblTotalValue.AutoSize = true;
-            this.lblTotalValue.Location = new System.Drawing.Point(1169, 627);
-            this.lblTotalValue.Name = "lblTotalValue";
-            this.lblTotalValue.Size = new System.Drawing.Size(16, 17);
-            this.lblTotalValue.TabIndex = 12;
-            this.lblTotalValue.Text = "0";
-            // 
-            // btnPreviousPage
-            // 
-            this.btnPreviousPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnPreviousPage.AutoSize = true;
-            this.btnPreviousPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnPreviousPage.Location = new System.Drawing.Point(406, 619);
-            this.btnPreviousPage.Name = "btnPreviousPage";
-            this.btnPreviousPage.Size = new System.Drawing.Size(73, 27);
-            this.btnPreviousPage.TabIndex = 16;
-            this.btnPreviousPage.Text = "Previous";
-            this.btnPreviousPage.UseVisualStyleBackColor = true;
-            this.btnPreviousPage.Click += new System.EventHandler(this.btnPreviousPage_Click);
+            this.btnModels.Location = new System.Drawing.Point(14, 125);
+            this.btnModels.Name = "btnModels";
+            this.btnModels.Size = new System.Drawing.Size(75, 23);
+            this.btnModels.TabIndex = 16;
+            this.btnModels.Text = "Models";
+            this.btnModels.UseVisualStyleBackColor = true;
+            this.btnModels.Click += new System.EventHandler(this.btnModels_Click);
             // 
             // MainForm
             // 
@@ -745,7 +759,7 @@
         private System.Windows.Forms.Label lblSoldTo;
         private System.Windows.Forms.Label lblSoldOn;
         private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.DateTimePicker dateTimePickerSoldOn;
+        private System.Windows.Forms.DateTimePicker dateTimePickerOuter;
         private System.Windows.Forms.ComboBox dropDownSoldTo;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ComboBox comboBox1;
@@ -756,6 +770,7 @@
         private System.Windows.Forms.Label lblPageNo;
         private System.Windows.Forms.Button btnNextPage;
         private System.Windows.Forms.TextBox txtPageNo;
+        private System.Windows.Forms.Button btnModels;
     }
 }
 

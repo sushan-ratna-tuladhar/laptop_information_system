@@ -65,6 +65,7 @@ namespace LaptopInformationSystem
 
                             this.btnSave.Hide();
                             this.btnCancel.Hide();
+                            this.btnModels.Hide();
 
                             this.lblLoading.Hide();
                         }
@@ -93,7 +94,8 @@ namespace LaptopInformationSystem
             dropdownAddModelBrand.Hide();
             txtAddModelName.Hide();
             dataGridCommon.Hide();
-            
+            this.btnModels.Hide();
+
             grpAddComponents.Hide();
             btnSoldOutSave.Hide();
             grpShowDevices.Show();
@@ -117,8 +119,7 @@ namespace LaptopInformationSystem
             btnSoldOutSave.Hide();
             lblSoldTo.Hide();
             dropDownSoldTo.Hide();
-            lblSoldOn.Hide();
-            dateTimePickerSoldOn.Hide();
+            //lblSoldOn.Hide();
 
             btnShowDevice.Enabled = false;
 
@@ -153,8 +154,9 @@ namespace LaptopInformationSystem
                 this.txtCodeSearch.Text = "";
                 this.txtPageNo.Text = "1";
                 this.dropdownPageSize.Text = "20";
+                this.dateTimePickerOuter.Value = DateTime.Parse("2020-01-01");
 
-                this.showData(1, 20, "", 0, "");
+                this.showData(1, 20, "", 0, "", null);
 
             }
             catch (Exception ex)
@@ -175,6 +177,7 @@ namespace LaptopInformationSystem
             lblAddModelBrand.Hide();
             dropdownAddModelBrand.Hide();
             txtAddModelName.Hide();
+            this.btnModels.Hide();
 
             grpAddComponents.Show();
             grpAddComponents.Text = "Add Devices";
@@ -374,7 +377,14 @@ namespace LaptopInformationSystem
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "");
+                DateTime? soldOnDate = null;
+
+                if (this.dateTimePickerOuter.Value != DateTime.Parse("1990-01-01"))
+                {
+                    soldOnDate = this.dateTimePickerOuter.Value;
+                }
+
+                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate);
             }
             catch (Exception ex)
             {
@@ -400,9 +410,10 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "previousPage");
+                this.showData(pageNumber, pageSize, search, modelId, "previousPage", soldOnDate);
             }
             catch (Exception ex)
             {
@@ -423,9 +434,10 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "nextPage");
+                this.showData(pageNumber, pageSize, search, modelId, "nextPage", soldOnDate);
 
             }
             catch (Exception ex)
@@ -489,17 +501,15 @@ namespace LaptopInformationSystem
                 if (dialogResult == DialogResult.Yes)
                 {
                     string result = this.db.DeleteDevice(serialNo);
-                    DialogResult dialogResultDeleted = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
+                }
 
-                    if (dialogResultDeleted == DialogResult.OK)
-                    {
-                        this.showData(Convert.ToInt32(this.txtPageNo.Text), 20, "", 0, "");
-                        this.lblTotalValue.Text = Convert.ToString(this.db.GetTotalDevices("", 0));
-                    }
-                }
-                else if (dialogResult == DialogResult.No)
-                {
-                }
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
+                int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
+                int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
+                string search = this.txtCodeSearch.Text.Trim();
+                int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
+
+                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate);
             }
 
             //when remarks button is clicked
@@ -560,6 +570,48 @@ namespace LaptopInformationSystem
                 if(dataGridCommon.Rows.Count > 1)
                 {
                     this.dataGridCommon.Rows.RemoveAt(dataGridCommon.CurrentRow.Index);
+                }
+            }
+
+            //when delete model button is clicked
+            if (this.dataGridCommon.Columns[e.ColumnIndex].Name == "btnModelDelete")
+            {
+                string model = dataGridCommon.Rows[e.RowIndex].Cells["Model"].Value != null ? dataGridCommon.Rows[e.RowIndex].Cells["Model"].Value.ToString() : "";
+                int modelId = Convert.ToInt32(dataGridCommon.Rows[e.RowIndex].Cells["ID"].Value);
+                int deviceCount = Convert.ToInt32(this.db.GetTotalDevices("", modelId, null));
+
+                DialogResult dialogResult = MessageBox.Show(model + " has " + deviceCount + " devices, are you sure you want to delete?", "Delete", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    string result = this.db.DeleteModel(modelId);
+                    DialogResult dialogResultDeleted = MessageBox.Show(result, "Notice", MessageBoxButtons.OK);
+
+                    if (dialogResultDeleted == DialogResult.OK)
+                    {
+                        this.dataGridCommon.Columns.Clear();
+                        this.dataGridCommon.DataSource = this.db.GetModels(0, false);
+
+                        this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                        this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                        this.dataGridCommon.Columns["ID"].Visible = false;
+
+                        DataGridViewButtonColumn button = new DataGridViewButtonColumn();
+                        {
+                            button.Name = "btnModelDelete";
+                            button.HeaderText = "";
+                            button.Text = "Delete";
+                            button.UseColumnTextForButtonValue = true;
+                            this.dataGridCommon.Columns.Add(button);
+                        }
+
+                        if (!dataGridCommon.Visible)
+                        {
+                            dataGridCommon.Show();
+                        }
+                    }
+                }
+                else if (dialogResult == DialogResult.No)
+                {
                 }
             }
 
@@ -628,6 +680,7 @@ namespace LaptopInformationSystem
             lblAddBrandModelName.Show();
             this.btnSave.Show();
             this.btnCancel.Show();
+            this.btnModels.Hide();
             
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
@@ -667,7 +720,8 @@ namespace LaptopInformationSystem
             btnReport.Enabled = true;
             this.btnSave.Show();
             this.btnCancel.Show();
-            
+            this.btnModels.Show();
+
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
             txtAddModelName.Show();
@@ -782,11 +836,11 @@ namespace LaptopInformationSystem
             dropdownGetDevicesModel.ValueMember = "ID";
         }
 
-        void showData(int pageNumber, int pageSize, string search, int modelId, string type)
+        void showData(int pageNumber, int pageSize, string search, int modelId, string type, DateTime? soldOnDate)
         {
             this.dataGridDevices.Columns.Clear();
 
-            int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId));
+            int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId, soldOnDate));
             int remainingPages = 0;
 
             int maxPage = 0;
@@ -821,7 +875,7 @@ namespace LaptopInformationSystem
                 }
             }
 
-            if (pageNumber == maxPage)
+            if (pageNumber == maxPage || maxPage < 1)
             {
                 this.btnNextPage.Enabled = false;
             }
@@ -841,7 +895,7 @@ namespace LaptopInformationSystem
 
             txtPageNo.Text = Convert.ToString(pageNumber);
 
-            this.devices = this.db.GetDevices(search, modelId, pageNumber, pageSize, "", "");
+            this.devices = this.db.GetDevices(search, modelId, pageNumber, pageSize, "", "", soldOnDate);
 
             this.dataGridDevices.DataSource = this.devices;
 
@@ -995,6 +1049,7 @@ namespace LaptopInformationSystem
             txtAddModelName.Hide();
             this.btnSave.Hide();
             this.btnCancel.Hide();
+            this.btnModels.Hide();
             
             grpAddComponents.Show();
             grpAddComponents.Text = "Report";
@@ -1024,6 +1079,7 @@ namespace LaptopInformationSystem
             dataGridCommon.Hide();
 
             grpAddComponents.Hide();
+            this.btnModels.Hide();
             grpShowDevices.Show();
             btnSoldOut.Enabled = false;
 
@@ -1073,11 +1129,11 @@ namespace LaptopInformationSystem
             lblSoldTo.Show();
             dropDownSoldTo.Show();
             lblSoldOn.Show();
-            dateTimePickerSoldOn.Show();
+            dateTimePickerOuter.Show();
 
             this.dataGridDevices.Columns.Add("SN", "S/N");
             this.dataGridDevices.Columns["SN"].ValueType = typeof(string);
-            
+            this.dateTimePickerOuter.Value = DateTime.Now;
             dropDownSoldTo.DisplayMember = "Buyer";
             dropDownSoldTo.ValueMember = "ID";
             dropDownSoldTo.DataSource = this.buyers;
@@ -1117,7 +1173,7 @@ namespace LaptopInformationSystem
             try
             {
                 string soldTo = dropDownSoldTo.Text;
-                string soldOn = dateTimePickerSoldOn.Value.ToString();
+                string soldOn = dateTimePickerOuter.Value.ToString();
 
                 DataTable soldDevices = new DataTable();
                 //Adding the Columns.
@@ -1185,7 +1241,7 @@ namespace LaptopInformationSystem
                         int modelId = 0;
                         int.TryParse(this.dropdownGetDevicesModel.ValueMember, out modelId);
 
-                        this.showData(pageNo, pageSize, this.txtCodeSearch.Text, modelId, "");
+                        this.showData(pageNo, pageSize, this.txtCodeSearch.Text, modelId, "", this.dateTimePickerOuter.Value);
                     }
             }
             catch (Exception ex)
@@ -1208,6 +1264,81 @@ namespace LaptopInformationSystem
         private void grpShowDevices_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void dropdownGetDevicesModel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnModels_Click(object sender, EventArgs e)
+        {
+            grpShowDevices.Hide();
+            txtAddBrandName.Hide();
+            //dataGridCommon.Show();
+            lblAddBrandModelName.Show();
+            btnReport.Enabled = true;
+            this.btnSave.Hide();
+            this.btnCancel.Hide();
+
+            grpAddComponents.Show();
+            lblAddBrandModelName.Hide();
+            txtAddModelName.Hide();
+            lblAddModelBrand.Hide();
+            this.btnModels.Hide();
+
+            grpAddComponents.Text = "Add Model";
+            btnAddModel.Enabled = true;
+
+            dropdownAddModelBrand.Hide();
+
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
+            }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
+            }
+
+            if (dataGridCommon.ReadOnly == false)
+            {
+                dataGridCommon.ReadOnly = true;
+            }
+
+            this.dataGridCommon.Columns.Clear();
+            this.dataGridCommon.DataSource = this.db.GetModels(0,false);
+
+            this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["ID"].Visible = false;
+
+            DataGridViewButtonColumn button = new DataGridViewButtonColumn();
+            {
+                button.Name = "btnModelDelete";
+                button.HeaderText = "";
+                button.Text = "Delete";
+                button.UseColumnTextForButtonValue = true;
+                this.dataGridCommon.Columns.Add(button);
+            }
+            
+            if (!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+        }
+
+        private void dateTimePickerOuter_MouseDown(object sender, MouseEventArgs e)
+        {
+            //this.dateTimePickerOuter.Value = DateTime.Now;
         }
     }
 }
