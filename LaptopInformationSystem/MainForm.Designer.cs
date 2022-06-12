@@ -62,6 +62,7 @@
             this.lblSoldTo = new System.Windows.Forms.Label();
             this.dataGridDevices = new System.Windows.Forms.DataGridView();
             this.grpAddComponents = new System.Windows.Forms.GroupBox();
+            this.btnModels = new System.Windows.Forms.Button();
             this.dropdownAddModelBrand = new System.Windows.Forms.ComboBox();
             this.lblAddModelBrand = new System.Windows.Forms.Label();
             this.txtAddBrandName = new System.Windows.Forms.TextBox();
@@ -78,7 +79,9 @@
             this.btnAddBrand = new System.Windows.Forms.Button();
             this.btnReport = new System.Windows.Forms.Button();
             this.btnAddModel = new System.Windows.Forms.Button();
-            this.btnModels = new System.Windows.Forms.Button();
+            this.checkBoxShowAllStock = new System.Windows.Forms.CheckBox();
+            this.dateTimePickerPurchasedOn = new System.Windows.Forms.DateTimePicker();
+            this.lblPurchasedOn = new System.Windows.Forms.Label();
             this.grpLaptopInformationSystem.SuspendLayout();
             this.grpShowDevices.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridDevices)).BeginInit();
@@ -107,6 +110,8 @@
             // 
             this.grpShowDevices.AutoSize = true;
             this.grpShowDevices.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.grpShowDevices.Controls.Add(this.dateTimePickerPurchasedOn);
+            this.grpShowDevices.Controls.Add(this.lblPurchasedOn);
             this.grpShowDevices.Controls.Add(this.lblTotalValue);
             this.grpShowDevices.Controls.Add(this.btnPreviousPage);
             this.grpShowDevices.Controls.Add(this.lblTotal);
@@ -114,12 +119,10 @@
             this.grpShowDevices.Controls.Add(this.btnNextPage);
             this.grpShowDevices.Controls.Add(this.txtPageNo);
             this.grpShowDevices.Controls.Add(this.dateTimePickerOuter);
-            this.grpShowDevices.Controls.Add(this.dropDownSoldTo);
             this.grpShowDevices.Controls.Add(this.comboBox2);
             this.grpShowDevices.Controls.Add(this.comboBox1);
             this.grpShowDevices.Controls.Add(this.lblSoldOn);
             this.grpShowDevices.Controls.Add(this.textBox3);
-            this.grpShowDevices.Controls.Add(this.btnSoldOutSave);
             this.grpShowDevices.Controls.Add(this.button3);
             this.grpShowDevices.Controls.Add(this.button2);
             this.grpShowDevices.Controls.Add(this.textBox2);
@@ -130,13 +133,15 @@
             this.grpShowDevices.Controls.Add(this.lblModel);
             this.grpShowDevices.Controls.Add(this.lblBrand);
             this.grpShowDevices.Controls.Add(this.btnCancelGetDevices);
-            this.grpShowDevices.Controls.Add(this.btnGetDevices);
             this.grpShowDevices.Controls.Add(this.dropdownPageSize);
             this.grpShowDevices.Controls.Add(this.lblPageSize);
             this.grpShowDevices.Controls.Add(this.txtCodeSearch);
             this.grpShowDevices.Controls.Add(this.lblSearch);
             this.grpShowDevices.Controls.Add(this.lblSoldTo);
             this.grpShowDevices.Controls.Add(this.dataGridDevices);
+            this.grpShowDevices.Controls.Add(this.dropDownSoldTo);
+            this.grpShowDevices.Controls.Add(this.btnSoldOutSave);
+            this.grpShowDevices.Controls.Add(this.btnGetDevices);
             this.grpShowDevices.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpShowDevices.Location = new System.Drawing.Point(3, 108);
             this.grpShowDevices.Name = "grpShowDevices";
@@ -162,7 +167,7 @@
             this.btnPreviousPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnPreviousPage.AutoSize = true;
             this.btnPreviousPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnPreviousPage.Location = new System.Drawing.Point(406, 619);
+            this.btnPreviousPage.Location = new System.Drawing.Point(803, 620);
             this.btnPreviousPage.Name = "btnPreviousPage";
             this.btnPreviousPage.Size = new System.Drawing.Size(73, 27);
             this.btnPreviousPage.TabIndex = 16;
@@ -185,7 +190,7 @@
             // 
             this.lblPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblPageNo.AutoSize = true;
-            this.lblPageNo.Location = new System.Drawing.Point(594, 624);
+            this.lblPageNo.Location = new System.Drawing.Point(914, 624);
             this.lblPageNo.Name = "lblPageNo";
             this.lblPageNo.Size = new System.Drawing.Size(49, 17);
             this.lblPageNo.TabIndex = 13;
@@ -196,7 +201,7 @@
             this.btnNextPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnNextPage.AutoSize = true;
             this.btnNextPage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnNextPage.Location = new System.Drawing.Point(844, 619);
+            this.btnNextPage.Location = new System.Drawing.Point(1026, 620);
             this.btnNextPage.Name = "btnNextPage";
             this.btnNextPage.Size = new System.Drawing.Size(46, 27);
             this.btnNextPage.TabIndex = 15;
@@ -207,7 +212,7 @@
             // txtPageNo
             // 
             this.txtPageNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtPageNo.Location = new System.Drawing.Point(649, 624);
+            this.txtPageNo.Location = new System.Drawing.Point(969, 624);
             this.txtPageNo.MaximumSize = new System.Drawing.Size(26, 22);
             this.txtPageNo.MaxLength = 100;
             this.txtPageNo.Name = "txtPageNo";
@@ -219,9 +224,9 @@
             // 
             // dateTimePickerOuter
             // 
-            this.dateTimePickerOuter.Location = new System.Drawing.Point(941, 30);
+            this.dateTimePickerOuter.Location = new System.Drawing.Point(852, 30);
             this.dateTimePickerOuter.Name = "dateTimePickerOuter";
-            this.dateTimePickerOuter.Size = new System.Drawing.Size(269, 22);
+            this.dateTimePickerOuter.Size = new System.Drawing.Size(241, 22);
             this.dateTimePickerOuter.TabIndex = 27;
             this.dateTimePickerOuter.ValueChanged += new System.EventHandler(this.dateTimePickerSoldOn_ValueChanged);
             this.dateTimePickerOuter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dateTimePickerOuter_MouseDown);
@@ -229,7 +234,7 @@
             // dropDownSoldTo
             // 
             this.dropDownSoldTo.FormattingEnabled = true;
-            this.dropDownSoldTo.Location = new System.Drawing.Point(388, 30);
+            this.dropDownSoldTo.Location = new System.Drawing.Point(379, 30);
             this.dropDownSoldTo.Name = "dropDownSoldTo";
             this.dropDownSoldTo.Size = new System.Drawing.Size(164, 24);
             this.dropDownSoldTo.TabIndex = 30;
@@ -265,7 +270,7 @@
             // lblSoldOn
             // 
             this.lblSoldOn.AutoSize = true;
-            this.lblSoldOn.Location = new System.Drawing.Point(875, 33);
+            this.lblSoldOn.Location = new System.Drawing.Point(786, 33);
             this.lblSoldOn.Name = "lblSoldOn";
             this.lblSoldOn.Size = new System.Drawing.Size(60, 17);
             this.lblSoldOn.TabIndex = 21;
@@ -331,9 +336,10 @@
             // 
             // dropdownGetDevicesModel
             // 
+            this.dropdownGetDevicesModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.dropdownGetDevicesModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dropdownGetDevicesModel.FormattingEnabled = true;
-            this.dropdownGetDevicesModel.Location = new System.Drawing.Point(715, 30);
+            this.dropdownGetDevicesModel.Location = new System.Drawing.Point(458, 621);
             this.dropdownGetDevicesModel.Name = "dropdownGetDevicesModel";
             this.dropdownGetDevicesModel.Size = new System.Drawing.Size(132, 24);
             this.dropdownGetDevicesModel.TabIndex = 20;
@@ -341,9 +347,10 @@
             // 
             // dropdownGetDevicesBrand
             // 
+            this.dropdownGetDevicesBrand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.dropdownGetDevicesBrand.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dropdownGetDevicesBrand.FormattingEnabled = true;
-            this.dropdownGetDevicesBrand.Location = new System.Drawing.Point(532, 30);
+            this.dropdownGetDevicesBrand.Location = new System.Drawing.Point(266, 621);
             this.dropdownGetDevicesBrand.Name = "dropdownGetDevicesBrand";
             this.dropdownGetDevicesBrand.Size = new System.Drawing.Size(121, 24);
             this.dropdownGetDevicesBrand.TabIndex = 19;
@@ -351,8 +358,9 @@
             // 
             // lblModel
             // 
+            this.lblModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblModel.AutoSize = true;
-            this.lblModel.Location = new System.Drawing.Point(659, 33);
+            this.lblModel.Location = new System.Drawing.Point(402, 626);
             this.lblModel.Name = "lblModel";
             this.lblModel.Size = new System.Drawing.Size(50, 17);
             this.lblModel.TabIndex = 18;
@@ -360,8 +368,9 @@
             // 
             // lblBrand
             // 
+            this.lblBrand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblBrand.AutoSize = true;
-            this.lblBrand.Location = new System.Drawing.Point(480, 33);
+            this.lblBrand.Location = new System.Drawing.Point(210, 626);
             this.lblBrand.Name = "lblBrand";
             this.lblBrand.Size = new System.Drawing.Size(50, 17);
             this.lblBrand.TabIndex = 17;
@@ -389,13 +398,14 @@
             // 
             // dropdownPageSize
             // 
+            this.dropdownPageSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.dropdownPageSize.FormattingEnabled = true;
             this.dropdownPageSize.Items.AddRange(new object[] {
             "10",
             "20",
             "50",
             "100"});
-            this.dropdownPageSize.Location = new System.Drawing.Point(406, 30);
+            this.dropdownPageSize.Location = new System.Drawing.Point(95, 621);
             this.dropdownPageSize.Name = "dropdownPageSize";
             this.dropdownPageSize.Size = new System.Drawing.Size(53, 24);
             this.dropdownPageSize.TabIndex = 3;
@@ -406,8 +416,9 @@
             // 
             // lblPageSize
             // 
+            this.lblPageSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblPageSize.AutoSize = true;
-            this.lblPageSize.Location = new System.Drawing.Point(326, 33);
+            this.lblPageSize.Location = new System.Drawing.Point(15, 626);
             this.lblPageSize.Name = "lblPageSize";
             this.lblPageSize.Size = new System.Drawing.Size(74, 17);
             this.lblPageSize.TabIndex = 2;
@@ -435,7 +446,7 @@
             // lblSoldTo
             // 
             this.lblSoldTo.AutoSize = true;
-            this.lblSoldTo.Location = new System.Drawing.Point(326, 33);
+            this.lblSoldTo.Location = new System.Drawing.Point(317, 33);
             this.lblSoldTo.Name = "lblSoldTo";
             this.lblSoldTo.Size = new System.Drawing.Size(56, 17);
             this.lblSoldTo.TabIndex = 20;
@@ -465,6 +476,7 @@
             this.grpAddComponents.AutoSize = true;
             this.grpAddComponents.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grpAddComponents.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.grpAddComponents.Controls.Add(this.checkBoxShowAllStock);
             this.grpAddComponents.Controls.Add(this.btnModels);
             this.grpAddComponents.Controls.Add(this.dropdownAddModelBrand);
             this.grpAddComponents.Controls.Add(this.lblAddModelBrand);
@@ -482,6 +494,16 @@
             this.grpAddComponents.TabStop = false;
             this.grpAddComponents.Text = "Add Device";
             this.grpAddComponents.Visible = false;
+            // 
+            // btnModels
+            // 
+            this.btnModels.Location = new System.Drawing.Point(14, 125);
+            this.btnModels.Name = "btnModels";
+            this.btnModels.Size = new System.Drawing.Size(75, 23);
+            this.btnModels.TabIndex = 16;
+            this.btnModels.Text = "Models";
+            this.btnModels.UseVisualStyleBackColor = true;
+            this.btnModels.Click += new System.EventHandler(this.btnModels_Click);
             // 
             // dropdownAddModelBrand
             // 
@@ -684,15 +706,34 @@
             this.btnAddModel.UseVisualStyleBackColor = true;
             this.btnAddModel.Click += new System.EventHandler(this.btnAddModel_Click);
             // 
-            // btnModels
+            // checkBoxShowAllStock
             // 
-            this.btnModels.Location = new System.Drawing.Point(14, 125);
-            this.btnModels.Name = "btnModels";
-            this.btnModels.Size = new System.Drawing.Size(75, 23);
-            this.btnModels.TabIndex = 16;
-            this.btnModels.Text = "Models";
-            this.btnModels.UseVisualStyleBackColor = true;
-            this.btnModels.Click += new System.EventHandler(this.btnModels_Click);
+            this.checkBoxShowAllStock.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxShowAllStock.AutoSize = true;
+            this.checkBoxShowAllStock.Location = new System.Drawing.Point(1289, 20);
+            this.checkBoxShowAllStock.Name = "checkBoxShowAllStock";
+            this.checkBoxShowAllStock.Size = new System.Drawing.Size(82, 21);
+            this.checkBoxShowAllStock.TabIndex = 31;
+            this.checkBoxShowAllStock.Text = "Show all";
+            this.checkBoxShowAllStock.UseVisualStyleBackColor = true;
+            this.checkBoxShowAllStock.CheckedChanged += new System.EventHandler(this.checkBoxShowAllStock_CheckedChanged);
+            // 
+            // dateTimePickerPurchasedOn
+            // 
+            this.dateTimePickerPurchasedOn.Location = new System.Drawing.Point(470, 30);
+            this.dateTimePickerPurchasedOn.Name = "dateTimePickerPurchasedOn";
+            this.dateTimePickerPurchasedOn.Size = new System.Drawing.Size(241, 22);
+            this.dateTimePickerPurchasedOn.TabIndex = 32;
+            this.dateTimePickerPurchasedOn.ValueChanged += new System.EventHandler(this.dateTimePicker1_ValueChanged);
+            // 
+            // lblPurchasedOn
+            // 
+            this.lblPurchasedOn.AutoSize = true;
+            this.lblPurchasedOn.Location = new System.Drawing.Point(364, 33);
+            this.lblPurchasedOn.Name = "lblPurchasedOn";
+            this.lblPurchasedOn.Size = new System.Drawing.Size(100, 17);
+            this.lblPurchasedOn.TabIndex = 31;
+            this.lblPurchasedOn.Text = "Purchased on:";
             // 
             // MainForm
             // 
@@ -771,6 +812,9 @@
         private System.Windows.Forms.Button btnNextPage;
         private System.Windows.Forms.TextBox txtPageNo;
         private System.Windows.Forms.Button btnModels;
+        private System.Windows.Forms.CheckBox checkBoxShowAllStock;
+        private System.Windows.Forms.DateTimePicker dateTimePickerPurchasedOn;
+        private System.Windows.Forms.Label lblPurchasedOn;
     }
 }
 

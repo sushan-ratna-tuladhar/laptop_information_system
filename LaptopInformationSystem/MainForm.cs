@@ -66,6 +66,7 @@ namespace LaptopInformationSystem
                             this.btnSave.Hide();
                             this.btnCancel.Hide();
                             this.btnModels.Hide();
+                            this.checkBoxShowAllStock.Show();
 
                             this.lblLoading.Hide();
                         }
@@ -95,6 +96,7 @@ namespace LaptopInformationSystem
             txtAddModelName.Hide();
             dataGridCommon.Hide();
             this.btnModels.Hide();
+            this.checkBoxShowAllStock.Hide();
 
             grpAddComponents.Hide();
             btnSoldOutSave.Hide();
@@ -119,7 +121,9 @@ namespace LaptopInformationSystem
             btnSoldOutSave.Hide();
             lblSoldTo.Hide();
             dropDownSoldTo.Hide();
-            //lblSoldOn.Hide();
+
+            lblPurchasedOn.Show();
+            dateTimePickerPurchasedOn.Show();
 
             btnShowDevice.Enabled = false;
 
@@ -155,8 +159,9 @@ namespace LaptopInformationSystem
                 this.txtPageNo.Text = "1";
                 this.dropdownPageSize.Text = "20";
                 this.dateTimePickerOuter.Value = DateTime.Parse("2020-01-01");
+                this.dateTimePickerPurchasedOn.Value = DateTime.Parse("2020-01-01");
 
-                this.showData(1, 20, "", 0, "", null);
+                this.showData(1, 20, "", 0, "", null, null);
 
             }
             catch (Exception ex)
@@ -178,6 +183,7 @@ namespace LaptopInformationSystem
             dropdownAddModelBrand.Hide();
             txtAddModelName.Hide();
             this.btnModels.Hide();
+            this.checkBoxShowAllStock.Hide();
 
             grpAddComponents.Show();
             grpAddComponents.Text = "Add Devices";
@@ -377,14 +383,19 @@ namespace LaptopInformationSystem
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                DateTime? soldOnDate = null;
+                DateTime? soldOnDate = null, purchasedOnDate = null;
 
                 if (this.dateTimePickerOuter.Value != DateTime.Parse("1990-01-01"))
                 {
                     soldOnDate = this.dateTimePickerOuter.Value;
                 }
 
-                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate);
+                if (this.dateTimePickerPurchasedOn.Value != DateTime.Parse("1990-01-01"))
+                {
+                    purchasedOnDate = this.dateTimePickerPurchasedOn.Value;
+                }
+
+                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate, purchasedOnDate);
             }
             catch (Exception ex)
             {
@@ -410,10 +421,10 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
-                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value, purchasedOnDate = this.dateTimePickerPurchasedOn.Value;
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "previousPage", soldOnDate);
+                this.showData(pageNumber, pageSize, search, modelId, "previousPage", soldOnDate, purchasedOnDate);
             }
             catch (Exception ex)
             {
@@ -434,10 +445,10 @@ namespace LaptopInformationSystem
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
-                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value, purchasedOnDate = this.dateTimePickerPurchasedOn.Value;
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "nextPage", soldOnDate);
+                this.showData(pageNumber, pageSize, search, modelId, "nextPage", soldOnDate, purchasedOnDate);
 
             }
             catch (Exception ex)
@@ -503,13 +514,13 @@ namespace LaptopInformationSystem
                     string result = this.db.DeleteDevice(serialNo);
                 }
 
-                DateTime? soldOnDate = this.dateTimePickerOuter.Value;
+                DateTime? soldOnDate = this.dateTimePickerOuter.Value, purchasedOnDate = this.dateTimePickerPurchasedOn.Value;
                 int pageNumber = Convert.ToInt32(txtPageNo.Text.Trim());
                 int pageSize = Convert.ToInt32(dropdownPageSize.Text.Trim());
                 string search = this.txtCodeSearch.Text.Trim();
                 int modelId = Convert.ToInt32(dropdownGetDevicesModel.SelectedValue);
 
-                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate);
+                this.showData(pageNumber, pageSize, search, modelId, "", soldOnDate, purchasedOnDate);
             }
 
             //when remarks button is clicked
@@ -578,7 +589,7 @@ namespace LaptopInformationSystem
             {
                 string model = dataGridCommon.Rows[e.RowIndex].Cells["Model"].Value != null ? dataGridCommon.Rows[e.RowIndex].Cells["Model"].Value.ToString() : "";
                 int modelId = Convert.ToInt32(dataGridCommon.Rows[e.RowIndex].Cells["ID"].Value);
-                int deviceCount = Convert.ToInt32(this.db.GetTotalDevices("", modelId, null));
+                int deviceCount = Convert.ToInt32(this.db.GetTotalDevices("", modelId, null, null));
 
                 DialogResult dialogResult = MessageBox.Show(model + " has " + deviceCount + " devices, are you sure you want to delete?", "Delete", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
@@ -681,7 +692,8 @@ namespace LaptopInformationSystem
             this.btnSave.Show();
             this.btnCancel.Show();
             this.btnModels.Hide();
-            
+            this.checkBoxShowAllStock.Hide();
+
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
             txtAddBrandName.Show();
@@ -721,6 +733,7 @@ namespace LaptopInformationSystem
             this.btnSave.Show();
             this.btnCancel.Show();
             this.btnModels.Show();
+            this.checkBoxShowAllStock.Hide();
 
             grpAddComponents.Show();
             lblAddBrandModelName.Show();
@@ -836,11 +849,11 @@ namespace LaptopInformationSystem
             dropdownGetDevicesModel.ValueMember = "ID";
         }
 
-        void showData(int pageNumber, int pageSize, string search, int modelId, string type, DateTime? soldOnDate)
+        void showData(int pageNumber, int pageSize, string search, int modelId, string type, DateTime? soldOnDate, DateTime? purchasedOnDate)
         {
             this.dataGridDevices.Columns.Clear();
 
-            int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId, soldOnDate));
+            int total = Convert.ToInt32(this.db.GetTotalDevices(search, modelId, soldOnDate, purchasedOnDate));
             int remainingPages = 0;
 
             int maxPage = 0;
@@ -895,7 +908,7 @@ namespace LaptopInformationSystem
 
             txtPageNo.Text = Convert.ToString(pageNumber);
 
-            this.devices = this.db.GetDevices(search, modelId, pageNumber, pageSize, "", "", soldOnDate);
+            this.devices = this.db.GetDevices(search, modelId, pageNumber, pageSize, "", "", soldOnDate, purchasedOnDate);
 
             this.dataGridDevices.DataSource = this.devices;
 
@@ -1010,63 +1023,7 @@ namespace LaptopInformationSystem
 
         private void btnReport_Click(object sender, EventArgs e)
         {
-            if (btnReport.Enabled == true)
-            {
-                btnReport.Enabled = false;
-            }
-            if (btnAddModel.Enabled == false)
-            {
-                btnAddModel.Enabled = true;
-            }
-            if (btnShowDevice.Enabled == false)
-            {
-                btnShowDevice.Enabled = true;
-            }
-            if (btnAddBrand.Enabled == false)
-            {
-                btnAddBrand.Enabled = true;
-            }
-            if (btnAddDevice.Enabled == false)
-            {
-                btnAddDevice.Enabled = true;
-            }
-            if (btnSoldOut.Enabled == false)
-            {
-                btnSoldOut.Enabled = true;
-            }
-
-            if (dataGridCommon.ReadOnly == false)
-            {
-                dataGridCommon.ReadOnly = true;
-            }
-
-            grpShowDevices.Hide();
-            dataGridCommon.Show();
-            txtAddBrandName.Hide();
-            lblAddBrandModelName.Hide();
-            lblAddModelBrand.Hide();
-            dropdownAddModelBrand.Hide();
-            txtAddModelName.Hide();
-            this.btnSave.Hide();
-            this.btnCancel.Hide();
-            this.btnModels.Hide();
-            
-            grpAddComponents.Show();
-            grpAddComponents.Text = "Report";
-            this.report = this.db.GetReport();
-            this.dataGridCommon.Columns.Clear();
-            this.dataGridCommon.DataSource = this.report;
-
-            this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridCommon.Columns["Device count"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-
-            //this.dataGridCommon.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-            if (!dataGridCommon.Visible)
-            {
-                dataGridCommon.Show();
-            }
+            this.showReport();
         }
 
         private void btnSoldOut_Click(object sender, EventArgs e)
@@ -1077,6 +1034,7 @@ namespace LaptopInformationSystem
             dropdownAddModelBrand.Hide();
             txtAddModelName.Hide();
             dataGridCommon.Hide();
+            this.checkBoxShowAllStock.Hide();
 
             grpAddComponents.Hide();
             this.btnModels.Hide();
@@ -1131,9 +1089,13 @@ namespace LaptopInformationSystem
             lblSoldOn.Show();
             dateTimePickerOuter.Show();
 
+            lblPurchasedOn.Hide();
+            dateTimePickerPurchasedOn.Hide();
+
             this.dataGridDevices.Columns.Add("SN", "S/N");
             this.dataGridDevices.Columns["SN"].ValueType = typeof(string);
             this.dateTimePickerOuter.Value = DateTime.Now;
+            this.dateTimePickerPurchasedOn.Value = DateTime.Now;
             dropDownSoldTo.DisplayMember = "Buyer";
             dropDownSoldTo.ValueMember = "ID";
             dropDownSoldTo.DataSource = this.buyers;
@@ -1241,7 +1203,7 @@ namespace LaptopInformationSystem
                         int modelId = 0;
                         int.TryParse(this.dropdownGetDevicesModel.ValueMember, out modelId);
 
-                        this.showData(pageNo, pageSize, this.txtCodeSearch.Text, modelId, "", this.dateTimePickerOuter.Value);
+                        this.showData(pageNo, pageSize, this.txtCodeSearch.Text, modelId, "", this.dateTimePickerOuter.Value, this.dateTimePickerPurchasedOn.Value);
                     }
             }
             catch (Exception ex)
@@ -1339,6 +1301,79 @@ namespace LaptopInformationSystem
         private void dateTimePickerOuter_MouseDown(object sender, MouseEventArgs e)
         {
             //this.dateTimePickerOuter.Value = DateTime.Now;
+        }
+
+        private void checkBoxShowAllStock_CheckedChanged(object sender, EventArgs e)
+        {
+            this.showReport(this.checkBoxShowAllStock.Checked);
+        }
+
+        private void showReport(bool showAllStock = false)
+        {
+            if (btnReport.Enabled == true)
+            {
+                btnReport.Enabled = false;
+            }
+            if (btnAddModel.Enabled == false)
+            {
+                btnAddModel.Enabled = true;
+            }
+            if (btnShowDevice.Enabled == false)
+            {
+                btnShowDevice.Enabled = true;
+            }
+            if (btnAddBrand.Enabled == false)
+            {
+                btnAddBrand.Enabled = true;
+            }
+            if (btnAddDevice.Enabled == false)
+            {
+                btnAddDevice.Enabled = true;
+            }
+            if (btnSoldOut.Enabled == false)
+            {
+                btnSoldOut.Enabled = true;
+            }
+
+            if (dataGridCommon.ReadOnly == false)
+            {
+                dataGridCommon.ReadOnly = true;
+            }
+
+            grpShowDevices.Hide();
+            dataGridCommon.Show();
+            txtAddBrandName.Hide();
+            lblAddBrandModelName.Hide();
+            lblAddModelBrand.Hide();
+            dropdownAddModelBrand.Hide();
+            txtAddModelName.Hide();
+            this.btnSave.Hide();
+            this.btnCancel.Hide();
+            this.btnModels.Hide();
+            this.checkBoxShowAllStock.Show();
+
+            grpAddComponents.Show();
+            grpAddComponents.Text = "Report";
+
+            this.report = this.db.GetReport(showAllStock);
+            this.dataGridCommon.Columns.Clear();
+            this.dataGridCommon.DataSource = this.report;
+
+            this.dataGridCommon.Columns["No."].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridCommon.Columns["Brand"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridCommon.Columns["Model"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridCommon.Columns["Device count"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+
+            //this.dataGridCommon.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            if (!dataGridCommon.Visible)
+            {
+                dataGridCommon.Show();
+            }
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

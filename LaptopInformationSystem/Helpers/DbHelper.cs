@@ -278,14 +278,14 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir, DateTime? soldOnDate)
+        public DataTable GetDevices(string search, int modelId, int pageNumber, int pageSize, string orderBy, string orderDir, DateTime? soldOnDate, DateTime? purchasedOnDate)
         {
             DataTable results = new DataTable();
             int offset = (pageNumber - 1) * pageSize;
             string finalCommand = "";
             string searchCommand = "";
             string getDevicesCommand = 
-                "SELECT d.id AS ID, b.id AS BrandId, COALESCE(b.name,'') AS Brand, m.id AS ModelId, COALESCE(m.name,'') AS Model, COALESCE(d.serial_number,'') AS SN, COALESCE(d.type,'') AS Type, COALESCE(d.purchased_from,'') AS PurchasedFrom, purchased_on AS PurchasedOn, " +
+                "SELECT d.id AS ID, b.id AS BrandId, COALESCE(b.name,'') AS Brand, m.id AS ModelId, COALESCE(m.name,'') AS Model, COALESCE(d.serial_number,'') AS SN, COALESCE(d.type,'') AS Type, COALESCE(d.purchased_from,'') AS PurchasedFrom, d.purchased_on AS PurchasedOn, " +
                 "COALESCE(d.invoice_number,'') AS InvoiceNumber, buy.id AS BuyerId, COALESCE(buy.name,'') AS SoldTo, d.sold_on AS SoldOn, COALESCE(d.update_remarks,'') AS UpdateRemarks, COALESCE(d.repair_remarks,'') AS RepairRemarks " + 
                 "FROM devices d " + 
                 "JOIN models m ON m.id = d.model_id " + 
@@ -311,6 +311,14 @@ namespace LaptopInformationSystem.Helpers
                     if(Convert.ToDateTime(soldOnDate) > Convert.ToDateTime("2020-01-01"))
                     {
                         searchCommand = searchCommand + " AND (d.sold_on = @soldOnDate)";
+                    }
+                }
+
+                if(purchasedOnDate != null)
+                {
+                    if (Convert.ToDateTime(purchasedOnDate) > Convert.ToDateTime("2020-01-01"))
+                    {
+                        searchCommand = searchCommand + " AND (d.purchased_on = @purchasedOnDate)";
                     }
                 }
 
@@ -350,6 +358,7 @@ namespace LaptopInformationSystem.Helpers
                 cmd.Parameters.AddWithValue("@orderDir", orderDir);
                 cmd.Parameters.AddWithValue("@modelId", modelId);
                 cmd.Parameters.AddWithValue("@soldOnDate", Convert.ToDateTime(soldOnDate).ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@purchasedOnDate", Convert.ToDateTime(purchasedOnDate).ToString("yyyy-MM-dd"));
 
                 this.conn.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
@@ -691,7 +700,7 @@ namespace LaptopInformationSystem.Helpers
 
         }
 
-        public string GetTotalDevices(string search, int modelId, DateTime? soldOnDate)
+        public string GetTotalDevices(string search, int modelId, DateTime? soldOnDate, DateTime? purchasedOnDate)
         {
             string total = "0";
             try
@@ -713,6 +722,13 @@ namespace LaptopInformationSystem.Helpers
                         searchCommand = searchCommand + " AND (d.sold_on = @soldOnDate)";
                     }
                 }
+                if (purchasedOnDate != null)
+                {
+                    if (Convert.ToDateTime(purchasedOnDate) > Convert.ToDateTime("2020-01-01"))
+                    {
+                        searchCommand = searchCommand + " AND (d.purchased_on = @purchasedOnDate)";
+                    }
+                }
                 if (modelId != 0)
                 {
                     modelCommand = " AND d.model_id = @modelId";
@@ -722,6 +738,7 @@ namespace LaptopInformationSystem.Helpers
                 cmd.Parameters.AddWithValue("@search", search);
                 cmd.Parameters.AddWithValue("@modelId", modelId);
                 cmd.Parameters.AddWithValue("@soldOnDate", Convert.ToDateTime(soldOnDate).ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@purchasedOnDate", Convert.ToDateTime(purchasedOnDate).ToString("yyyy-MM-dd"));
 
                 this.conn.Open();
                 total = Convert.ToString(cmd.ExecuteScalar());
@@ -773,7 +790,7 @@ namespace LaptopInformationSystem.Helpers
             }
         }
 
-        public DataTable GetReport()
+        public DataTable GetReport(bool all = false)
         {
             DataTable results = new DataTable();
             string getReportCommand =
@@ -783,8 +800,18 @@ namespace LaptopInformationSystem.Helpers
                 "LEFT JOIN devices d ON d.model_id = m.id " +
                 "AND ( d.sold_on IS NULL OR d.buyer_id IS NULL OR d.buyer_id IN (SELECT buy.id FROM buyers buy WHERE COALESCE(buy.name,'') = '') )" +
                 "WHERE COALESCE(m.name,'') <> '' " +
-                "GROUP BY b.name, m.name " +
-                "ORDER BY b.name, m.name";
+                "GROUP BY b.name, m.name ";
+
+            string countFilter = "HAVING COUNT(d.id) > 0 ";
+            string orderCommand = "ORDER BY b.name, m.name";
+
+            if(!all)
+            {
+                getReportCommand = getReportCommand + countFilter + orderCommand;
+            } else
+            {
+                getReportCommand = getReportCommand + orderCommand;
+            }
 
             try
             {
